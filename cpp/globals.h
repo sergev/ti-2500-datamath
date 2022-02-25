@@ -8,7 +8,7 @@
 
 // ORIGINAL SINCLAIR DATA
 struct Calculator_t {
-    bool sinclair = true;
+    bool sinclair = false;
 
     // Important: Array order matches display order, not bit order.
     // I.e. a[0] is high-order digit S10, a[10] is low-order digit S0.

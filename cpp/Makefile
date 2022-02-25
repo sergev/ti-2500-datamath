@@ -1,7 +1,7 @@
 PROG            = calc
 CXXFLAGS        = -O3 -g -Wall -Werror -std=c++20
 LDFLAGS         = -g
-OBJ             = main.o disasm.o cpu.o keys.o
+OBJ             = main.o disasm.o cpu.o keys.o code.o
 
 all:		$(PROG)
 
