@@ -29,7 +29,7 @@ struct Calculator_t {
     uint8_t keyStrobeKP = 0; // '
 
     unsigned int address = 0; // PROGRAM COUNTER
-    uint8_t display_on = 1;   // Flag for display on
+    uint8_t display_on = 0;   // Flag for display on
     int8_t mask[MASK_LENGTH];
 
     bool resetinprogress = false;

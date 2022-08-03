@@ -39,7 +39,8 @@ int main()
     for (;;) {
         step();
 
-        updateDisplay();
+        if (calc.address == 42) // WAITNO instruction: waiting for input
+            updateDisplay();
 
         char key = readKey();
 
