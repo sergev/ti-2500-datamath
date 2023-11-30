@@ -2,7 +2,7 @@
 # Common includes and libraries for all tests.
 #
 include_directories(BEFORE ../src)
-link_libraries(calculator gtest gtest_main)
+link_libraries(calculator gtest_main)
 add_definitions(-DTEST_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 #

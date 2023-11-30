@@ -577,3 +577,25 @@ void step(Calculator_t &calc)
 
     displayInstruction(68); // if printing is enabled, do a println after executing a line of code
 }
+
+//
+// Run the code until stopped on wait.
+//
+void Calculator_t::run()
+{
+    if (keyPressed == 'C') {
+        // Reset the calculator: start from address 0.
+        address = 0;
+        keyStrobeKN = 0;
+        keyStrobeKO = 0;
+        keyStrobeKP = 0;
+        dActive = 1;
+        keyPressed = 0;
+    }
+
+    unsigned last_addr;
+    do {
+        last_addr = address;
+        step(*this);
+    } while (address != last_addr);
+}

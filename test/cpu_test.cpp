@@ -2,5 +2,6 @@
 
 TEST_F(calc_test, initial_state)
 {
-    EXPECT_EQ(calc.get_display(), "[        0]");
+    calc.run();
+    EXPECT_EQ(calc.get_display(), "[        0.]");
 }
