@@ -15,4 +15,12 @@ protected:
     {
         calc.run();
     }
+
+    void send_expect(const std::string &send, const std::string &expect)
+    {
+        for (char ch : send) {
+            calc.press_key(ch);
+        }
+        EXPECT_EQ(calc.get_display(), expect);
+    }
 };
