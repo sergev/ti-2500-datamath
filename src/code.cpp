@@ -1,4 +1,4 @@
-#include "globals.h"
+#include "calculator.h"
 
 //
 // These are the 320 instructions that performed all the tasks on the TI-2500 calculator.

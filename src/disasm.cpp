@@ -1,5 +1,5 @@
 #include <iostream>
-#include "globals.h"
+#include "calculator.h"
 
 void displayInstruction(unsigned instructionid)
 {

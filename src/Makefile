@@ -1,7 +1,7 @@
 PROG            = calc
 CXXFLAGS        = -O3 -g -Wall -Werror -std=c++20
 LDFLAGS         = -g
-OBJ             = main.o disasm.o cpu.o keys.o code.o
+OBJ             = main.o disasm.o cpu.o keys.o code.o display.o
 
 all:		$(PROG)
 
@@ -12,7 +12,7 @@ calc:           $(OBJ)
 		$(CXX) $(LDFLAGS) $(OBJ) -o $@
 
 ###
-cpu.o: cpu.cpp globals.h
-disasm.o: disasm.cpp globals.h
-keys.o: keys.cpp globals.h
-main.o: main.cpp globals.h
+cpu.o: cpu.cpp calculator.h
+disasm.o: disasm.cpp calculator.h
+keys.o: keys.cpp calculator.h
+main.o: main.cpp calculator.h

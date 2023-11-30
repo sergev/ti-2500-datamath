@@ -1,3 +1,4 @@
+#include <string>
 #include <cstdint>
 
 #define NUMBER_OF_MASKS 16
@@ -33,9 +34,9 @@ struct Calculator_t {
     int8_t mask[MASK_LENGTH];
 
     bool resetinprogress = false;
-};
 
-extern struct Calculator_t calc;
+    std::string get_display() const;
+};
 
 extern const unsigned int objectCode[320];
 
@@ -49,6 +50,6 @@ static const unsigned long LISTOPSWITHK = 1007135334;
 
 void displayInstruction(unsigned instructionid);
 
-uint8_t readKey();
+uint8_t readKey(Calculator_t &calc);
 
-void step();
+void step(Calculator_t &calc);

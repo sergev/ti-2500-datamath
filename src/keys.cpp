@@ -1,9 +1,11 @@
-#include "globals.h"
+#include "calculator.h"
 
 // const char PrintableKeys[19] = "12+E0v-378X654/9^C";
 
 const char KeysKN[10] = "156789234";
 const char KeysKO[10] = "C/*^E0v+-";
+
+int lastSelectDigit = 0;
 
 int analogRead(int pin)
 {
@@ -11,7 +13,7 @@ int analogRead(int pin)
     return 0;
 }
 
-uint8_t readKey()
+uint8_t readKey(Calculator_t &calc)
 {
     uint8_t key = 0;
 
