@@ -234,15 +234,12 @@ void updateD(Calculator_t &calc)
     calc.d[calc.dActive - 1] = 0;
 }
 
-void step(Calculator_t &calc)
+void Calculator_t::step()
 {
-    // Serial.print(F("addr:"));
-    // Serial.print(calc.address);
-
-    unsigned int instruction = getInstruction(calc.address);
+    unsigned int instruction = getInstruction(address);
     uint8_t classBits = instruction >> 9;
     uint8_t opcode = (instruction >> 4) & 0x1f;
-    unsigned int nextAddress = calc.address + 1;
+    unsigned int nextAddress = address + 1;
 
     // Serial.print(F(" data:"));
     // Serial.print(opcode);
@@ -254,167 +251,167 @@ void step(Calculator_t &calc)
         switch (opcode) {
         case 0: // AABA: A+B -> A
             displayInstruction(1);
-            add(calc, calc.a, calc.b, calc.a);
+            add(*this, a, b, a);
             break;
         case 1: // AAKA: A+K -> A
             displayInstruction(2);
-            add(calc, calc.a, getMask(calc), calc.a);
+            add(*this, a, getMask(*this), a);
             break;
         case 2: // AAKC: A+K -> C
             displayInstruction(3);
-            add(calc, calc.a, getMask(calc), calc.c);
+            add(*this, a, getMask(*this), c);
             break;
         case 3:
-            if (calc.sinclair) { // ACBB C+B -> B
+            if (sinclair) { // ACBB C+B -> B
                 displayInstruction(4);
-                add(calc, calc.c, calc.b, calc.b);
+                add(*this, c, b, b);
             } else { // ABOA: B -> A
                 displayInstruction(5);
-                copy(calc, calc.b, calc.a);
+                copy(*this, b, a);
             }
             break;
         case 4: // ABOC: B -> C
             displayInstruction(6);
-            copy(calc, calc.b, calc.c);
+            copy(*this, b, c);
             break;
         case 5: // ACKA: C+K -> A
             displayInstruction(7);
-            add(calc, calc.c, getMask(calc), calc.a);
+            add(*this, c, getMask(*this), a);
             break;
         case 6: // AKCB: C+K -> B
             displayInstruction(8);
-            add(calc, calc.c, getMask(calc), calc.b);
+            add(*this, c, getMask(*this), b);
             break;
         case 7: // SABA: A-B -> A
             displayInstruction(9);
-            sub(calc, calc.a, calc.b, calc.a);
+            sub(*this, a, b, a);
             break;
         case 8: // SABC: A-B -> C
             displayInstruction(10);
-            sub(calc, calc.a, calc.b, calc.c);
+            sub(*this, a, b, c);
             break;
         case 9: // SAKA: A-K -> A
             displayInstruction(11);
-            sub(calc, calc.a, getMask(calc), calc.a);
+            sub(*this, a, getMask(*this), a);
             break;
         case 10: // SCBC: C-B -> C
             displayInstruction(12);
-            sub(calc, calc.c, calc.b, calc.c);
+            sub(*this, c, b, c);
             break;
         case 11: // SCKC: C-K -> C
             displayInstruction(13);
-            sub(calc, calc.c, getMask(calc), calc.c);
+            sub(*this, c, getMask(*this), c);
             break;
         case 12: // CAB: compare A-B
             displayInstruction(14);
-            compare(calc, calc.a, calc.b);
+            compare(*this, a, b);
             break;
         case 13: // CAK: compare A-K
             displayInstruction(15);
-            compare(calc, calc.a, getMask(calc));
+            compare(*this, a, getMask(*this));
             break;
         case 14: // CCB: compare C-B
             displayInstruction(16);
-            compare(calc, calc.c, calc.b);
+            compare(*this, c, b);
             break;
         case 15: // CCK: compare C-K
             displayInstruction(17);
-            compare(calc, calc.c, getMask(calc));
+            compare(*this, c, getMask(*this));
             break;
         case 16: // AKA: K -> A
             displayInstruction(18);
-            copy(calc, getMask(calc), calc.a);
+            copy(*this, getMask(*this), a);
             break;
         case 17: // AKB: K -> B
             displayInstruction(19);
-            copy(calc, getMask(calc), calc.b);
+            copy(*this, getMask(*this), b);
             break;
         case 18: // AKC: K -> C
             displayInstruction(20);
-            copy(calc, getMask(calc), calc.c);
+            copy(*this, getMask(*this), c);
             break;
         case 19: // EXAB: exchange A and B
             displayInstruction(21);
-            exchange(calc, calc.a, calc.b);
+            exchange(*this, a, b);
             break;
         case 20: // SLLA: shift A left
             displayInstruction(22);
-            sll(calc, calc.a);
+            sll(*this, a);
             break;
         case 21: // SLLB: shift B left
             displayInstruction(23);
-            sll(calc, calc.b);
+            sll(*this, b);
             break;
         case 22: // SLLC: shift C left
             displayInstruction(24);
-            sll(calc, calc.c);
+            sll(*this, c);
             break;
         case 23: // SRLA: shift A right
             displayInstruction(25);
-            srl(calc, calc.a);
+            srl(*this, a);
             break;
         case 24: // SRLB: shift B right
             displayInstruction(26);
-            srl(calc, calc.b);
+            srl(*this, b);
             break;
         case 25: // SRLC: shift C right
             displayInstruction(66);
-            srl(calc, calc.c);
+            srl(*this, c);
             break;
         case 26: // AKCN: A+K -> A until key down on N or D11 [sic]
             // Patent says sets condition if key down, but real behavior
             // is to set condition if addition overflows (i.e. no key down)
-            // calc.display_on = 0; //comment this line to glitch the display when a number key
+            // display_on = 0; //comment this line to glitch the display when a number key
             // is pressed (SINCLAIR behavior: actual hardware behavior)
-            add(calc, calc.a, getMask(calc), calc.a);
-            if (calc.keyStrobeKN) {
+            add(*this, a, getMask(*this), a);
+            if (keyStrobeKN()) {
                 displayInstruction(27);
                 // Advance to next instruction
-            } else if (calc.dActive != 10) {
+            } else if (dActive != 10) {
                 displayInstruction(28);
                 // Hold at current instruction and continue scan
-                nextAddress = calc.address;
+                nextAddress = address;
             } else {
                 displayInstruction(29);
                 // For state d10, fall through
             }
             break;
         case 27:
-            if (calc.sinclair) { // SCBA C-B -> A
+            if (sinclair) { // SCBA C-B -> A
                 displayInstruction(30);
-                sub(calc, calc.c, calc.b, calc.a);
+                sub(*this, c, b, a);
             } else { // AAKAH A+K -> A hex
                 displayInstruction(31);
-                add(calc, calc.a, getMask(calc), calc.a, 1 /* hex */);
-                calc.cc = 0;
-                // calc.ccMeaning = '';
+                add(*this, a, getMask(*this), a, 1 /* hex */);
+                cc = 0;
+                // ccMeaning = '';
             }
             break;
         case 28:
-            if (calc.sinclair) { // SCKB C-K -> B
+            if (sinclair) { // SCKB C-K -> B
                 displayInstruction(32);
-                sub(calc, calc.c, getMask(calc), calc.b);
+                sub(*this, c, getMask(*this), b);
             } else { // SAKAH A-K -> A hex
                 displayInstruction(33);
-                sub(calc, calc.a, getMask(calc), calc.a, 1 /* hex */);
-                calc.cc = 0;
-                // calc.ccMeaning = '';
+                sub(*this, a, getMask(*this), a, 1 /* hex */);
+                cc = 0;
+                // ccMeaning = '';
             }
             break;
         case 29: // ACKC: C+K -> C
             displayInstruction(34);
-            add(calc, calc.c, getMask(calc), calc.c);
+            add(*this, c, getMask(*this), c);
             break;
         case 30:
-            if (calc.sinclair) { // AABC A+B -> C
+            if (sinclair) { // AABC A+B -> C
                 displayInstruction(35);
-                add(calc, calc.a, calc.b, calc.c);
+                add(*this, a, b, c);
                 break;
             }
         case 31:
-            if (calc.sinclair) { // ACBC C+B -> C
+            if (sinclair) { // ACBC C+B -> C
                 displayInstruction(36);
-                add(calc, calc.c, calc.b, calc.c);
+                add(*this, c, b, c);
                 break;
             }
         default:
@@ -430,94 +427,94 @@ void step(Calculator_t &calc)
             displayInstruction(38);
             break;
         case 17: // WAITDK: wait for display key
-            calc.display_on = 0;
-            if (calc.keyPressed == DK) {
+            display_on = 0;
+            if (keyPressed == DK) {
                 // Jump
                 displayInstruction(39);
                 nextAddress = instruction & 0x1ff;
             } else {
                 // Hold address until DK pressed
                 displayInstruction(40);
-                nextAddress = calc.address;
+                nextAddress = address;
             }
             break;
         case 18: // WAITNO: wait for key or address register overflow
-            if (calc.keyStrobeKO || calc.keyStrobeKN || calc.keyStrobeKP) {
+            if (keyStrobeKO() || keyStrobeKN() || keyStrobeKP()) {
                 // Jump
                 displayInstruction(41);
                 nextAddress = instruction & 0x1ff;
             } else {
                 // Hold address until key pressed or address overflow (TODO)
                 displayInstruction(42);
-                nextAddress = calc.address;
+                nextAddress = address;
             }
             break;
         case 19: // SFB: set flag B
             displayInstruction(43);
-            writeFlag(calc, calc.bf, 1);
+            writeFlag(*this, bf, 1);
             break;
         case 20: // SFA: set flag A
             displayInstruction(44);
-            writeFlag(calc, calc.af, 1);
+            writeFlag(*this, af, 1);
             break;
         case 21: // SYNC (SYNCH): hold address until end of D10
             displayInstruction(45);
-            if (calc.dActive != 10) {
-                nextAddress = calc.address;
+            if (dActive != 10) {
+                nextAddress = address;
             }
-            calc.cc = 0;
-            // calc.ccMeaning = '';
+            cc = 0;
+            // ccMeaning = '';
             break;
         case 22:                      // SCAN (SCANNO): wait for key
-            calc.display_on = 1; // Reset display power off latch
-            if (calc.keyStrobeKO || calc.keyStrobeKN || calc.keyStrobeKP) {
+            display_on = 1; // Reset display power off latch
+            if (keyStrobeKO() || keyStrobeKN() || keyStrobeKP()) {
                 displayInstruction(46);
-                calc.cc = 1;
-                // calc.ccMeaning = 'key';
+                cc = 1;
+                // ccMeaning = 'key';
             } else {
                 displayInstruction(47);
-                calc.cc = 0;
-                // calc.ccMeaning = 'no key';
-                if (calc.dActive != 10) {
+                cc = 0;
+                // ccMeaning = 'no key';
+                if (dActive != 10) {
                     // Hold address until end of D10
-                    nextAddress = calc.address;
+                    nextAddress = address;
                 }
             }
             break;
         case 23: // ZFB: zero flag B
             displayInstruction(48);
-            writeFlag(calc, calc.bf, 0);
+            writeFlag(*this, bf, 0);
             break;
         case 24: // ZFA: zero flag A
             displayInstruction(49);
-            writeFlag(calc, calc.af, 0);
+            writeFlag(*this, af, 0);
             break;
         case 25: // TFB: test flag B
             displayInstruction(50);
-            testFlag(calc, calc.bf);
+            testFlag(*this, bf);
             break;
         case 26: // TFA: test flag A
             displayInstruction(51);
-            testFlag(calc, calc.af);
+            testFlag(*this, af);
             break;
         case 27: // FFB: flip flag B
             displayInstruction(52);
-            writeFlag(calc, calc.bf, -1 /* flip */);
+            writeFlag(*this, bf, -1 /* flip */);
             break;
         case 28: // FFA: flip flag A
             displayInstruction(67);
-            writeFlag(calc, calc.af, -1 /* flip */);
+            writeFlag(*this, af, -1 /* flip */);
             break;
         case 29: // CF: compare flags
             displayInstruction(53);
-            compareFlags(calc, calc.af, calc.bf);
+            compareFlags(*this, af, bf);
             break;
         case 30: // NOP
             displayInstruction(54);
             break;
         case 31: // EXF: exchange flags
             displayInstruction(55);
-            exchange(calc, calc.af, calc.bf);
+            exchange(*this, af, bf);
             break;
         default:
             // bad instruction
@@ -528,52 +525,52 @@ void step(Calculator_t &calc)
     } else if (classBits == 0) {
         // jump if reset: BIU, BIZ, BIGE, BINC, BIE, BET
         displayInstruction(57);
-        if (calc.cc == 0) {
+        if (cc == 0) {
             displayInstruction(58);
             nextAddress = instruction & 0x1ff;
         }
-        calc.cc = 0; // Clear after jump
-                             // calc.ccMeaning = '';
+        cc = 0; // Clear after jump
+                             // ccMeaning = '';
     } else if (classBits == 1) {
         // jump if set: BID, BIO, BILT, BIC, BINE
         displayInstruction(59);
-        if (calc.cc == 1) {
+        if (cc == 1) {
             displayInstruction(60);
             nextAddress = instruction & 0x1ff;
         }
-        calc.cc = 0; // Clear after jump
-                             // calc.ccMeaning = '';
+        cc = 0; // Clear after jump
+                             // ccMeaning = '';
     } else if ((instruction >> 7) == 8) {
         // Jump if key down on KO (BKO)
         displayInstruction(61);
-        if (calc.keyStrobeKO) {
-            calc.display_on = 0;
+        if (keyStrobeKO()) {
+            display_on = 0;
             displayInstruction(62);
             nextAddress = instruction & 0x1ff;
         }
-        calc.cc = 0; // Clear after jump
-                             // calc.ccMeaning = '';
+        cc = 0; // Clear after jump
+                             // ccMeaning = '';
     } else if ((instruction >> 7) == 9) {
         // Jump if key down on KP (BKP)
         displayInstruction(63);
-        if (calc.keyStrobeKP) {
-            calc.display_on = 0;
+        if (keyStrobeKP()) {
+            display_on = 0;
             displayInstruction(64);
             nextAddress = instruction & 0x1ff;
         }
-        calc.cc = 0; // Clear after jump
-                             // calc.ccMeaning = '';
+        cc = 0; // Clear after jump
+                             // ccMeaning = '';
     } else {
         displayInstruction(65);
         // bad instruction
         // alert('Bad instruction code ' + instruction);
     }
-    calc.address = nextAddress;
+    address = nextAddress;
     // Put the mask for the next instruction in the model for display
-    // calc.mask = getMask(calc);
-    getMask(calc);
+    // mask = getMask(*this);
+    getMask(*this);
     // Update D state
-    updateD(calc);
+    updateD(*this);
 
     displayInstruction(68); // if printing is enabled, do a println after executing a line of code
 }
@@ -586,16 +583,21 @@ void Calculator_t::run()
     if (keyPressed == 'C') {
         // Reset the calculator: start from address 0.
         address = 0;
-        keyStrobeKN = 0;
-        keyStrobeKO = 0;
-        keyStrobeKP = 0;
-        dActive = 1;
         keyPressed = 0;
+        dActive = 1;
     }
 
-    unsigned last_addr;
+    unsigned last_addr = address;
+    unsigned same_addr_count = 0;
     do {
-        last_addr = address;
-        step(*this);
-    } while (address != last_addr);
+        step();
+
+        // Stop when waiting on the same address for too long.
+        if (address == last_addr) {
+            same_addr_count++;
+        } else {
+            same_addr_count = 0;
+            last_addr = address;
+        }
+    } while (same_addr_count < 11);
 }

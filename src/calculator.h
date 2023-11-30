@@ -26,10 +26,6 @@ public:
     int8_t cc{};
     char keyPressed{}; // Which key is currently pressed
 
-    uint8_t keyStrobeKN{}; //
-    uint8_t keyStrobeKO{}; //
-    uint8_t keyStrobeKP{}; //
-
     unsigned int address{}; // Program Counter
     uint8_t display_on{};   // Flag for display on
     int8_t mask[MASK_LENGTH]{};
@@ -39,22 +35,27 @@ public:
     // Get contents of the display.
     std::string get_display() const;
 
+    void displayInstruction(unsigned instructionid);
+
+    // Execute one instruction.
+    void step();
+
     // Run the code until stopped on wait.
     void run();
+
+    // Press key on keyboard.
+    void press_key(char k);
+
+    // Poll keyboard
+    bool keyStrobeKN() const; // Keys 1 2 3 4 5 6 7 8 9
+    bool keyStrobeKO() const; // Keys 0 . = + - * / C CE
+    bool keyStrobeKP() const; // Unused
 };
 
 extern const unsigned int objectCode[320];
 
 extern const char masks[NUMBER_OF_MASKS][MASK_LENGTH];
 
-extern int lastSelectDigit;
-
 // OPS WITH K: 1:AAKA 2:AAKC 5:ACKA 6:ACKB 9: 11:
 // const unsigned long LISTOPSWITHK = 000111100000001111010101001100110b;
 static const unsigned long LISTOPSWITHK = 1007135334;
-
-void displayInstruction(unsigned instructionid);
-
-uint8_t readKey(Calculator_t &calc);
-
-void step(Calculator_t &calc);

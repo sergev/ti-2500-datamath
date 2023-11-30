@@ -6,12 +6,12 @@ int main()
     Calculator_t calc;
 
     for (;;) {
-        step(calc);
+        calc.step();
 
         if (calc.address == 42) { // WAITNO instruction: waiting for input
             std::cout << calc.get_display() << std::endl;
         }
-
+#if 0
         char key = readKey(calc);
 
         if (calc.resetinprogress) {
@@ -30,5 +30,6 @@ int main()
                 calc.resetinprogress = true;
             }
         }
+#endif
     }
 }

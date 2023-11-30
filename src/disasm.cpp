@@ -1,7 +1,7 @@
 #include <iostream>
 #include "calculator.h"
 
-void displayInstruction(unsigned instructionid)
+void Calculator_t::displayInstruction(unsigned instructionid)
 {
     auto &out = std::cout;
 
@@ -10,7 +10,8 @@ void displayInstruction(unsigned instructionid)
         return;
     }
 
-    out << instructionid << ":";
+    out << '(' << address << ") "
+        << instructionid << ":";
     switch (instructionid) {
     case 1:
         out << "AABA: A+B -> A";

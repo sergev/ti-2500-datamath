@@ -1,40 +1,65 @@
+#include <iostream>
 #include "calculator.h"
 
-// const char PrintableKeys[19] = "12+E0v-378X654/9^C";
+//const char KeysKN[10] = "156789234";
+//const char KeysKO[10] = "C/*^E0v+-";
 
-const char KeysKN[10] = "156789234";
-const char KeysKO[10] = "C/*^E0v+-";
-
-int lastSelectDigit = 0;
-
-int analogRead(int pin)
+//
+// Press key on keyboard.
+//
+void Calculator_t::press_key(char k)
 {
-    // TODO: replace with user input
-    return 0;
+    if (k != 0) {
+        std::cout << "--- Press key '" << k << "'" << std::endl;
+    } else {
+        std::cout << "--- Release key '" << keyPressed << "'" << std::endl;
+    }
+    keyPressed = k;
+    run();
 }
 
-uint8_t readKey(Calculator_t &calc)
+//
+// Poll keys 1 2 3 4 5 6 7 8 9
+//
+bool Calculator_t::keyStrobeKN() const
 {
-    uint8_t key = 0;
-
-    if (analogRead(7) > 100) {
-        calc.keyStrobeKN = 1;
-        key = KeysKN[lastSelectDigit - 1];
-    } else {
-        calc.keyStrobeKN = 0;
+    switch (keyPressed) {
+    case '1': return (dActive == 1); // TODO
+    case '2': return (dActive == 2); // TODO
+    case '3': return (dActive == 3); // TODO
+    case '4': return (dActive == 4); // TODO
+    case '5': return (dActive == 5); // TODO
+    case '6': return (dActive == 6); // TODO
+    case '7': return (dActive == 7); // TODO
+    case '8': return (dActive == 8); // TODO
+    case '9': return (dActive == 9); // TODO
+    default: return false;
     }
+}
 
-    if (analogRead(6) > 100) {
-        calc.keyStrobeKO = 1;
-        key = KeysKO[lastSelectDigit - 1];
-    } else {
-        calc.keyStrobeKO = 0;
+//
+// Poll keys 0 . = + - * / C CE
+//
+bool Calculator_t::keyStrobeKO() const
+{
+    switch (keyPressed) {
+    case '0': return (dActive == 1); // TODO
+    case '.': return (dActive == 2); // TODO
+    case '=': return (dActive == 3); // TODO
+    case '+': return (dActive == 4); // TODO
+    case '-': return (dActive == 5); // TODO
+    case '*': return (dActive == 6); // TODO
+    case '/': return (dActive == 7); // TODO
+    case 'C': return (dActive == 8); // TODO
+    case 'E': return (dActive == 9); // TODO
+    default: return false;
     }
+}
 
-    // ensure C has priority
-    if ((lastSelectDigit == 1) && (calc.keyStrobeKO)) {
-        key = 'C';
-    }
-
-    return key;
+//
+// Poll keys: unused
+//
+bool Calculator_t::keyStrobeKP() const
+{
+    return false;
 }
