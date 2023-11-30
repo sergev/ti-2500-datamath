@@ -10,8 +10,9 @@ void Calculator_t::displayInstruction(unsigned instructionid)
         return;
     }
 
-    out << '(' << address << ") "
-        << instructionid << ":";
+    out << '(' << address
+        << ", " << dActive
+        << ") " << instructionid << ": ";
     switch (instructionid) {
     case 1:
         out << "AABA: A+B -> A";

@@ -13,6 +13,6 @@ protected:
 
     void SetUp() override
     {
-        //TODO
+        calc.run();
     }
 };

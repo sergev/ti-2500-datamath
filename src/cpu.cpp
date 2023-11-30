@@ -1,6 +1,7 @@
+#include <iostream>
 #include "calculator.h"
 
-bool opsWithK(uint8_t opcode)
+bool opsWithK(unsigned opcode)
 {
     return (LISTOPSWITHK & (1UL << opcode));
 }
@@ -10,21 +11,21 @@ unsigned int getInstruction(unsigned int PC)
     return objectCode[PC];
 }
 
-uint8_t getMaskNum(const Calculator_t &calc)
+unsigned getMaskNum(const Calculator_t &calc)
 {
     return getInstruction(calc.address) & 0x0f;
 }
 
-int8_t *getMask(Calculator_t &calc)
+int *getMask(Calculator_t &calc)
 {
     unsigned int instruction = getInstruction(calc.address);
-    uint8_t classBits = instruction >> 9;
-    uint8_t opcode = (instruction >> 4) & 0x1f;
+    unsigned classBits = instruction >> 9;
+    unsigned opcode = (instruction >> 4) & 0x1f;
 
     if (classBits == 3 || (classBits == 2 && opcode > 18 && opcode != 21 && opcode != 22)) {
-        uint8_t maskno = getMaskNum(calc);
+        unsigned maskno = getMaskNum(calc);
 
-        for (uint8_t i = 0; i <= 10; i++) {
+        for (unsigned i = 0; i <= 10; i++) {
             char maskdigit = masks[maskno][i];
 
             if (maskdigit == ' ') {
@@ -44,16 +45,16 @@ int8_t *getMask(Calculator_t &calc)
     return calc.mask;
 }
 
-void add(Calculator_t &calc, int8_t src1[], int8_t src2[], int8_t dst[], bool hex = false)
+void add(Calculator_t &calc, int src1[], int src2[], int dst[], bool hex = false)
 {
-    uint8_t carry = 0;
+    unsigned carry = 0;
     getMask(calc);
-    for (int8_t i = 10; i >= 0; i--) {
+    for (int i = 10; i >= 0; i--) {
         if (calc.mask[i] == ' ') {
             // masked out
             // continue;
         } else {
-            int8_t result = src1[i] + src2[i] + carry;
+            int result = src1[i] + src2[i] + carry;
             if (!hex && result >= 10) {
                 result -= 10;
                 carry = 1;
@@ -72,16 +73,16 @@ void add(Calculator_t &calc, int8_t src1[], int8_t src2[], int8_t dst[], bool he
     }
 }
 
-void sub(Calculator_t &calc, int8_t src1[], int8_t src2[], int8_t dst[], bool hex = false)
+void sub(Calculator_t &calc, int src1[], int src2[], int dst[], bool hex = false)
 {
-    uint8_t borrow = 0;
+    unsigned borrow = 0;
     getMask(calc);
-    for (int8_t i = 10; i >= 0; i--) {
+    for (int i = 10; i >= 0; i--) {
         if (calc.mask[i] == ' ') {
             // masked out
             // continue;
         } else {
-            int8_t result = src1[i] - src2[i] - borrow;
+            int result = src1[i] - src2[i] - borrow;
             if (result < 0) {
                 result += hex ? 16 : 10;
                 borrow = 1;
@@ -97,19 +98,19 @@ void sub(Calculator_t &calc, int8_t src1[], int8_t src2[], int8_t dst[], bool he
     }
 }
 
-void compare(Calculator_t &calc, int8_t src1[], int8_t src2[])
+void compare(Calculator_t &calc, int src1[], int src2[])
 {
-    int8_t tmp[11] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    int tmp[11] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     sub(calc, src1, src2, tmp);
     // Compare sets condition if not borrow
     // calc.ccMeaning = calc.cc ? "less than" : "not less than";
 }
 
-void copy(Calculator_t &calc, int8_t src[], int8_t dst[])
+void copy(Calculator_t &calc, int src[], int dst[])
 {
     getMask(calc);
-    for (int8_t i = 10; i >= 0; i--) {
+    for (int i = 10; i >= 0; i--) {
         if (calc.mask[i] == ' ') {
             // masked out
             // continue;
@@ -119,42 +120,42 @@ void copy(Calculator_t &calc, int8_t src[], int8_t dst[])
     }
 }
 
-void sll(Calculator_t &calc, int8_t src[])
+void sll(Calculator_t &calc, int src[])
 {
     getMask(calc);
-    int8_t digit = 0;
-    for (int8_t i = 10; i >= 0; i--) {
+    int digit = 0;
+    for (int i = 10; i >= 0; i--) {
         if (calc.mask[i] == ' ') {
             // masked out
             // continue;
         } else {
-            int8_t newdigit = src[i];
+            int newdigit = src[i];
             src[i] = digit;
             digit = newdigit;
         }
     }
 }
 
-void srl(Calculator_t &calc, int8_t src[])
+void srl(Calculator_t &calc, int src[])
 {
     getMask(calc);
-    int8_t digit = 0;
-    for (int8_t i = 0; i <= 10; i++) {
+    int digit = 0;
+    for (int i = 0; i <= 10; i++) {
         if (calc.mask[i] == ' ') {
             // masked out
             // continue;
         } else {
-            int8_t newdigit = src[i];
+            int newdigit = src[i];
             src[i] = digit;
             digit = newdigit;
         }
     }
 }
 
-void writeFlag(Calculator_t &calc, int8_t dest[], int8_t val)
+void writeFlag(Calculator_t &calc, int dest[], int val)
 {
     getMask(calc);
-    for (int8_t i = 10; i >= 0; i--) {
+    for (int i = 10; i >= 0; i--) {
         if (calc.mask[i] == ' ') {
             // masked out
             // continue;
@@ -165,11 +166,11 @@ void writeFlag(Calculator_t &calc, int8_t dest[], int8_t val)
     }
 }
 
-void compareFlags(Calculator_t &calc, int8_t src1[], int8_t src2[])
+void compareFlags(Calculator_t &calc, int src1[], int src2[])
 {
-    int8_t cc = 0;
+    int cc = 0;
     getMask(calc);
-    for (int8_t i = 10; i >= 0; i--) {
+    for (int i = 10; i >= 0; i--) {
         if (calc.mask[i] == ' ') {
             // masked out
             // continue;
@@ -185,26 +186,26 @@ void compareFlags(Calculator_t &calc, int8_t src1[], int8_t src2[])
     }
 }
 
-void exchange(Calculator_t &calc, int8_t src1[], int8_t src2[])
+void exchange(Calculator_t &calc, int src1[], int src2[])
 {
     getMask(calc);
-    for (int8_t i = 10; i >= 0; i--) {
+    for (int i = 10; i >= 0; i--) {
         if (calc.mask[i] == ' ') {
             // masked out
             // continue;
         } else {
-            int8_t t = src1[i];
+            int t = src1[i];
             src1[i] = src2[i];
             src2[i] = t;
         }
     }
 }
 
-void testFlag(Calculator_t &calc, int8_t src[])
+void testFlag(Calculator_t &calc, int src[])
 {
-    int8_t cc = 0;
+    int cc = 0;
     getMask(calc);
-    for (int8_t i = 10; i >= 0; i--) {
+    for (int i = 10; i >= 0; i--) {
         if (calc.mask[i] == ' ') {
             // masked out
             // continue;
@@ -223,7 +224,7 @@ void testFlag(Calculator_t &calc, int8_t src[])
 
 void updateD(Calculator_t &calc)
 {
-    for (int8_t i = 10; i >= 0; i--) {
+    for (int i = 10; i >= 0; i--) {
         calc.d[i] = 1;
     }
 
@@ -236,10 +237,10 @@ void updateD(Calculator_t &calc)
 
 void Calculator_t::step()
 {
-    unsigned int instruction = getInstruction(address);
-    uint8_t classBits = instruction >> 9;
-    uint8_t opcode = (instruction >> 4) & 0x1f;
-    unsigned int nextAddress = address + 1;
+    unsigned instruction = getInstruction(address);
+    unsigned classBits = instruction >> 9;
+    unsigned opcode = (instruction >> 4) & 0x1f;
+    unsigned nextAddress = address + 1;
 
     // Serial.print(F(" data:"));
     // Serial.print(opcode);
@@ -427,7 +428,7 @@ void Calculator_t::step()
             displayInstruction(38);
             break;
         case 17: // WAITDK: wait for display key
-            display_on = 0;
+            //display_on = 0;
             if (keyPressed == DK) {
                 // Jump
                 displayInstruction(39);
@@ -466,7 +467,7 @@ void Calculator_t::step()
             // ccMeaning = '';
             break;
         case 22:                      // SCAN (SCANNO): wait for key
-            display_on = 1; // Reset display power off latch
+            //display_on = 1; // Reset display power off latch
             if (keyStrobeKO() || keyStrobeKN() || keyStrobeKP()) {
                 displayInstruction(46);
                 cc = 1;
@@ -544,7 +545,7 @@ void Calculator_t::step()
         // Jump if key down on KO (BKO)
         displayInstruction(61);
         if (keyStrobeKO()) {
-            display_on = 0;
+            //display_on = 0;
             displayInstruction(62);
             nextAddress = instruction & 0x1ff;
         }
@@ -554,7 +555,7 @@ void Calculator_t::step()
         // Jump if key down on KP (BKP)
         displayInstruction(63);
         if (keyStrobeKP()) {
-            display_on = 0;
+            //display_on = 0;
             displayInstruction(64);
             nextAddress = instruction & 0x1ff;
         }
@@ -591,6 +592,12 @@ void Calculator_t::run()
     unsigned same_addr_count = 0;
     do {
         step();
+
+        if (address == 34 && keyPressed) {
+            // Release keyboard.
+            std::cout << "--- Release key '" << keyPressed << "'" << std::endl;
+            keyPressed = 0;
+        }
 
         // Stop when waiting on the same address for too long.
         if (address == last_addr) {

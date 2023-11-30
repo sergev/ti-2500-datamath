@@ -9,11 +9,7 @@
 //
 void Calculator_t::press_key(char k)
 {
-    if (k != 0) {
-        std::cout << "--- Press key '" << k << "'" << std::endl;
-    } else {
-        std::cout << "--- Release key '" << keyPressed << "'" << std::endl;
-    }
+    std::cout << "--- Press key '" << k << "'" << std::endl;
     keyPressed = k;
     run();
 }

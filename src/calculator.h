@@ -14,21 +14,20 @@ public:
 
     // Important: Array order matches display order, not bit order.
     // I.e. a[0] is high-order digit S10, a[10] is low-order digit S0.
-    int8_t a[11]{};  // Register A
-    int8_t b[11]{};  // Register B
-    int8_t c[11]{};  // Register C
-    int8_t af[11]{}; // Flags A
-    int8_t bf[11]{}; // Flags A
+    int a[11]{};  // Register A
+    int b[11]{};  // Register B
+    int c[11]{};  // Register C
+    int af[11]{}; // Flags A
+    int bf[11]{}; // Flags A
 
-    int8_t d[11] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    int d[11] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
-    uint8_t dActive{ 1 }; // Currently active D value 1-11. d[dActive-1] == 0
-    int8_t cc{};
+    unsigned dActive{ 1 }; // Currently active D value 1-11. d[dActive-1] == 0
+    int cc{};
     char keyPressed{}; // Which key is currently pressed
 
     unsigned int address{}; // Program Counter
-    uint8_t display_on{};   // Flag for display on
-    int8_t mask[MASK_LENGTH]{};
+    int mask[MASK_LENGTH]{};
 
     bool resetinprogress{};
 
