@@ -507,7 +507,7 @@ void Calculator::step()
 //
 void Calculator::run()
 {
-    if (keyPressed == 'C') {
+    if (keyPressed == 'C' || keyPressed == 'c') {
         // Reset the calculator: start from address 0.
         address = 0;
         keyPressed = 0;
@@ -520,7 +520,7 @@ void Calculator::run()
         step();
 
         if (address == 34 && keyPressed) {
-            // Release keyboard.
+            // Release key to avoid infinite loop in debouncer.
             std::cout << "--- Release key '" << keyPressed << "'" << std::endl;
             keyPressed = 0;
         }
