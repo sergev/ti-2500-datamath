@@ -31,10 +31,10 @@ void Calculator::decode_mask(unsigned instruction)
         { "         00" }, // M14
         { "00000000000" }, // M15
     };
-    unsigned classBits = instruction >> 9;
-    unsigned opcode    = (instruction >> 4) & 0x1f;
+    unsigned class_bits = instruction >> 9;
+    unsigned opcode     = (instruction >> 4) & 0x1f;
 
-    if (classBits == 3 || (classBits == 2 && opcode > 18 && opcode != 21 && opcode != 22)) {
+    if (class_bits == 3 || (class_bits == 2 && opcode > 18 && opcode != 21 && opcode != 22)) {
         unsigned maskno = instruction & 0x0f;
 
         for (unsigned i = 0; i < REG_LEN; i++) {
@@ -42,7 +42,7 @@ void Calculator::decode_mask(unsigned instruction)
 
             if (maskdigit == ' ') {
                 mask[i] = maskdigit;
-            } else if (classBits == 3 && opsWithK(opcode)) {
+            } else if (class_bits == 3 && opsWithK(opcode)) {
                 // Register instruction
                 mask[i] = maskdigit - '0';
             } else {
@@ -191,335 +191,322 @@ void Calculator::test_flags(const Reg &x)
 void Calculator::step()
 {
     unsigned instruction = code_tab[program_counter];
-    unsigned classBits = instruction >> 9;
+    unsigned class_bits = instruction >> 9;
     unsigned opcode = (instruction >> 4) & 0x1f;
-    unsigned nextAddress = program_counter + 1;
+    unsigned next_pc = program_counter + 1;
 
     decode_mask(instruction);
     trace_instruction(instruction);
 
-    if (classBits == 3) {
+    if (class_bits == 3) {
         // Register instruction
         switch (opcode) {
-        case 0: // AABA: A+B -> A
-            //displayInstruction(1);
+        case 0:
+            // AABA: A+B -> A
             add(a, b, a);
             break;
-        case 1: // AAKA: A+K -> A
-            //displayInstruction(2);
+        case 1:
+            // AAKA: A+K -> A
             add(a, mask, a);
             break;
-        case 2: // AAKC: A+K -> C
-            //displayInstruction(3);
+        case 2:
+            // AAKC: A+K -> C
             add(a, mask, c);
             break;
         case 3:
-            if (sinclair_flag) { // ACBB C+B -> B
-                //displayInstruction(4);
+            if (sinclair_flag) {
+                // ACBB C+B -> B
                 add(c, b, b);
-            } else { // ABOA: B -> A
-                //displayInstruction(5);
+            } else {
+                // ABOA: B -> A
                 copy(b, a);
             }
             break;
-        case 4: // ABOC: B -> C
-            //displayInstruction(6);
+        case 4:
+            // ABOC: B -> C
             copy(b, c);
             break;
-        case 5: // ACKA: C+K -> A
-            //displayInstruction(7);
+        case 5:
+            // ACKA: C+K -> A
             add(c, mask, a);
             break;
-        case 6: // AKCB: C+K -> B
-            //displayInstruction(8);
+        case 6:
+            // AKCB: C+K -> B
             add(c, mask, b);
             break;
-        case 7: // SABA: A-B -> A
-            //displayInstruction(9);
+        case 7:
+            // SABA: A-B -> A
             sub(a, b, a);
             break;
-        case 8: // SABC: A-B -> C
-            //displayInstruction(10);
+        case 8:
+            // SABC: A-B -> C
             sub(a, b, c);
             break;
-        case 9: // SAKA: A-K -> A
-            //displayInstruction(11);
+        case 9:
+            // SAKA: A-K -> A
             sub(a, mask, a);
             break;
-        case 10: // SCBC: C-B -> C
-            //displayInstruction(12);
+        case 10:
+            // SCBC: C-B -> C
             sub(c, b, c);
             break;
-        case 11: // SCKC: C-K -> C
-            //displayInstruction(13);
+        case 11:
+            // SCKC: C-K -> C
             sub(c, mask, c);
             break;
-        case 12: // CAB: compare A-B
-            //displayInstruction(14);
+        case 12:
+            // CAB: compare A-B
             compare(a, b);
             break;
-        case 13: // CAK: compare A-K
-            //displayInstruction(15);
+        case 13:
+            // CAK: compare A-K
             compare(a, mask);
             break;
-        case 14: // CCB: compare C-B
-            //displayInstruction(16);
+        case 14:
+            // CCB: compare C-B
             compare(c, b);
             break;
-        case 15: // CCK: compare C-K
-            //displayInstruction(17);
+        case 15:
+            // CCK: compare C-K
             compare(c, mask);
             break;
-        case 16: // AKA: K -> A
-            //displayInstruction(18);
+        case 16:
+            // AKA: K -> A
             copy(mask, a);
             break;
-        case 17: // AKB: K -> B
-            //displayInstruction(19);
+        case 17:
+            // AKB: K -> B
             copy(mask, b);
             break;
-        case 18: // AKC: K -> C
-            //displayInstruction(20);
+        case 18:
+            // AKC: K -> C
             copy(mask, c);
             break;
-        case 19: // EXAB: exchange A and B
-            //displayInstruction(21);
+        case 19:
+            // EXAB: exchange A and B
             exchange(a, b);
             break;
-        case 20: // SLLA: shift A left
-            //displayInstruction(22);
+        case 20:
+            // SLLA: shift A left
             sll(a);
             break;
-        case 21: // SLLB: shift B left
-            //displayInstruction(23);
+        case 21:
+            // SLLB: shift B left
             sll(b);
             break;
-        case 22: // SLLC: shift C left
-            //displayInstruction(24);
+        case 22:
+            // SLLC: shift C left
             sll(c);
             break;
-        case 23: // SRLA: shift A right
-            //displayInstruction(25);
+        case 23:
+            // SRLA: shift A right
             srl(a);
             break;
-        case 24: // SRLB: shift B right
-            //displayInstruction(26);
+        case 24:
+            // SRLB: shift B right
             srl(b);
             break;
-        case 25: // SRLC: shift C right
-            //displayInstruction(66);
+        case 25:
+            // SRLC: shift C right
             srl(c);
             break;
-        case 26: // AKCN: A+K -> A until key down on N or D11 [sic]
+        case 26:
+            // AKCN: A+K -> A until key down on N or D11 [sic]
             // Patent says sets condition if key down, but real behavior
             // is to set condition if addition overflows (i.e. no key down)
             add(a, mask, a);
             if (keyStrobeKN()) {
-                //displayInstruction(27);
                 // Advance to next instruction
             } else if (d_phase != REG_LEN - 2) {
-                //displayInstruction(28);
                 // Hold at current instruction and continue scan
-                nextAddress = program_counter;
+                next_pc = program_counter;
             } else {
-                //displayInstruction(29);
                 // For state d10, fall through
             }
             break;
         case 27:
-            if (sinclair_flag) { // SCBA C-B -> A
-                //displayInstruction(30);
+            if (sinclair_flag) {
+                // SCBA C-B -> A
                 sub(c, b, a);
-            } else { // AAKAH A+K -> A hex
-                //displayInstruction(31);
+            } else {
+                // AAKAH A+K -> A hex
                 add(a, mask, a, true /* hex */);
                 condition_code = false;
                 // ccMeaning = '';
             }
             break;
         case 28:
-            if (sinclair_flag) { // SCKB C-K -> B
-                //displayInstruction(32);
+            if (sinclair_flag) {
+                // SCKB C-K -> B
                 sub(c, mask, b);
-            } else { // SAKAH A-K -> A hex
-                //displayInstruction(33);
+            } else {
+                // SAKAH A-K -> A hex
                 sub(a, mask, a, true /* hex */);
                 condition_code = false;
                 // ccMeaning = '';
             }
             break;
-        case 29: // ACKC: C+K -> C
-            //displayInstruction(34);
+        case 29:
+            // ACKC: C+K -> C
             add(c, mask, c);
             break;
         case 30:
-            if (sinclair_flag) { // AABC A+B -> C
-                //displayInstruction(35);
+            if (sinclair_flag) {
+                // AABC A+B -> C
                 add(a, b, c);
                 break;
             }
         case 31:
-            if (sinclair_flag) { // ACBC C+B -> C
-                //displayInstruction(36);
+            if (sinclair_flag) {
+                // ACBC C+B -> C
                 add(c, b, c);
                 break;
             }
         default:
             // bad instruction
             // alert('Bad instruction ' + instruction);
-            //displayInstruction(37);
             break;
         }
     } else if ((instruction >> 8) == 5) {
         // Flag instruction
         switch (opcode) {
-        case 16: // NOP
-            //displayInstruction(38);
+        case 16:
+            // NOP
             break;
-        case 17: // WAITDK: wait for display key
+        case 17:
+            // WAITDK: wait for display key
             if (key_pressed == 1) { // TODO: what does this mean?
                 // Jump
-                //displayInstruction(39);
-                nextAddress = instruction & 0x1ff;
+                next_pc = instruction & 0x1ff;
             } else {
                 // Hold address until DK pressed
-                //displayInstruction(40);
-                nextAddress = program_counter;
+                next_pc = program_counter;
             }
             break;
-        case 18: // WAITNO: wait for key or address register overflow
+        case 18:
+            // WAITNO: wait for key or address register overflow
             if (key_pressed) {
                 // Jump
-                //displayInstruction(41);
-                nextAddress = instruction & 0x1ff;
+                next_pc = instruction & 0x1ff;
             } else {
                 // Hold address until key pressed or address overflow (TODO)
-                //displayInstruction(42);
-                nextAddress = program_counter;
+                next_pc = program_counter;
             }
             break;
-        case 19: // SFB: set flag B
-            //displayInstruction(43);
+        case 19:
+            // SFB: set flag B
             set_flags(bf, 1);
             break;
-        case 20: // SFA: set flag A
-            //displayInstruction(44);
+        case 20:
+            // SFA: set flag A
             set_flags(af, 1);
             break;
-        case 21: // SYNC (SYNCH): hold address until end of D10
-            //displayInstruction(45);
+        case 21:
+            // SYNC (SYNCH): hold address until end of D10
             if (d_phase != REG_LEN - 2) {
-                nextAddress = program_counter;
+                next_pc = program_counter;
             }
             condition_code = false;
             // ccMeaning = '';
             break;
-        case 22:                      // SCAN (SCANNO): wait for key
+        case 22:
+            // SCAN (SCANNO): wait for key
             if (key_pressed) {
-                //displayInstruction(46);
                 condition_code = true;
                 // ccMeaning = 'key';
             } else {
-                //displayInstruction(47);
                 condition_code = false;
                 // ccMeaning = 'no key';
+
                 if (d_phase != REG_LEN - 2) {
                     // Hold address until end of D10
-                    nextAddress = program_counter;
+                    next_pc = program_counter;
                 }
             }
             break;
-        case 23: // ZFB: zero flag B
-            //displayInstruction(48);
+        case 23:
+            // ZFB: zero flag B
             set_flags(bf, 0);
             break;
-        case 24: // ZFA: zero flag A
-            //displayInstruction(49);
+        case 24:
+            // ZFA: zero flag A
             set_flags(af, 0);
             break;
-        case 25: // TFB: test flag B
-            //displayInstruction(50);
+        case 25:
+            // TFB: test flag B
             test_flags(bf);
             break;
-        case 26: // TFA: test flag A
-            //displayInstruction(51);
+        case 26:
+            // TFA: test flag A
             test_flags(af);
             break;
-        case 27: // FFB: flip flag B
-            //displayInstruction(52);
+        case 27:
+            // FFB: flip flag B
             set_flags(bf, -1 /* flip */);
             break;
-        case 28: // FFA: flip flag A
-            //displayInstruction(67);
+        case 28:
+            // FFA: flip flag A
             set_flags(af, -1 /* flip */);
             break;
-        case 29: // CF: compare flags
-            //displayInstruction(53);
+        case 29:
+            // CF: compare flags
             compare_flags(af, bf);
             break;
-        case 30: // NOP
-            //displayInstruction(54);
+        case 30:
+            // NOP
             break;
-        case 31: // EXF: exchange flags
-            //displayInstruction(55);
+        case 31:
+            // EXF: exchange flags
             exchange(af, bf);
             break;
         default:
             // bad instruction
             // alert('Bad instruction ' + instruction);
-            //displayInstruction(56);
             break;
         }
-    } else if (classBits == 0) {
+    } else if (class_bits == 0) {
         // jump if reset: BIU, BIZ, BIGE, BINC, BIE, BET
-        //displayInstruction(57);
         if (!condition_code) {
-            //displayInstruction(58);
-            nextAddress = instruction & 0x1ff;
+            next_pc = instruction & 0x1ff;
         }
         condition_code = false; // Clear after jump
         // ccMeaning = '';
-    } else if (classBits == 1) {
+
+    } else if (class_bits == 1) {
         // jump if set: BID, BIO, BILT, BIC, BINE
-        //displayInstruction(59);
         if (condition_code) {
-            //displayInstruction(60);
-            nextAddress = instruction & 0x1ff;
+            next_pc = instruction & 0x1ff;
         }
         condition_code = false; // Clear after jump
         // ccMeaning = '';
+
     } else if ((instruction >> 7) == 8) {
         // Jump if key down on KO (BKO)
-        //displayInstruction(61);
         if (keyStrobeKO()) {
-            //displayInstruction(62);
-            nextAddress = instruction & 0x1ff;
+            next_pc = instruction & 0x1ff;
         }
         condition_code = false; // Clear after jump
         // ccMeaning = '';
+
     } else if ((instruction >> 7) == 9) {
         // Jump if key down on KP (BKP)
-        //displayInstruction(63);
         if (keyStrobeKP()) {
-            //displayInstruction(64);
-            nextAddress = instruction & 0x1ff;
+            next_pc = instruction & 0x1ff;
         }
         condition_code = false; // Clear after jump
         // ccMeaning = '';
+
     } else {
-        //displayInstruction(65);
         // bad instruction
         // alert('Bad instruction code ' + instruction);
     }
-    program_counter = nextAddress;
+    program_counter = next_pc;
 
     // Update D state.
     d_phase += 1;
     if (d_phase > REG_LEN - 2) {
         d_phase = 0;
     }
-
-    //displayInstruction(68); // if printing is enabled, do a println after executing a line of code
 }
 
 //
