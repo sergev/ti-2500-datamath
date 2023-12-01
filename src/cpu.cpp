@@ -10,11 +10,10 @@ static bool opsWithK(unsigned opcode)
     return (LISTOPSWITHK >> opcode) & 1;
 }
 
-int *Calculator::getMask()
+void Calculator::update_mask(unsigned instruction)
 {
-    unsigned instruction = objectCode[address];
-    unsigned classBits   = instruction >> 9;
-    unsigned opcode      = (instruction >> 4) & 0x1f;
+    unsigned classBits = instruction >> 9;
+    unsigned opcode    = (instruction >> 4) & 0x1f;
 
     if (classBits == 3 || (classBits == 2 && opcode > 18 && opcode != 21 && opcode != 22)) {
         unsigned maskno = instruction & 0x0f;
@@ -31,22 +30,14 @@ int *Calculator::getMask()
                 mask[i] = '*';
             }
         }
-    } else {
-        mask[0] = 0;
     }
-
-    return mask;
 }
 
 void Calculator::add(int src1[], int src2[], int dst[], bool hex)
 {
     unsigned carry = 0;
-    getMask();
     for (int i = 10; i >= 0; i--) {
-        if (mask[i] == ' ') {
-            // masked out
-            // continue;
-        } else {
+        if (mask[i] != ' ') {
             int result = src1[i] + src2[i] + carry;
             if (!hex && result >= 10) {
                 result -= 10;
@@ -69,12 +60,8 @@ void Calculator::add(int src1[], int src2[], int dst[], bool hex)
 void Calculator::sub(int src1[], int src2[], int dst[], bool hex)
 {
     unsigned borrow = 0;
-    getMask();
     for (int i = 10; i >= 0; i--) {
-        if (mask[i] == ' ') {
-            // masked out
-            // continue;
-        } else {
+        if (mask[i] != ' ') {
             int result = src1[i] - src2[i] - borrow;
             if (result < 0) {
                 result += hex ? 16 : 10;
@@ -102,12 +89,8 @@ void Calculator::compare(int src1[], int src2[])
 
 void Calculator::copy(int src[], int dst[])
 {
-    getMask();
     for (int i = 10; i >= 0; i--) {
-        if (mask[i] == ' ') {
-            // masked out
-            // continue;
-        } else {
+        if (mask[i] != ' ') {
             dst[i] = src[i];
         }
     }
@@ -115,13 +98,9 @@ void Calculator::copy(int src[], int dst[])
 
 void Calculator::sll(int src[])
 {
-    getMask();
     int digit = 0;
     for (int i = 10; i >= 0; i--) {
-        if (mask[i] == ' ') {
-            // masked out
-            // continue;
-        } else {
+        if (mask[i] != ' ') {
             int newdigit = src[i];
             src[i] = digit;
             digit = newdigit;
@@ -131,13 +110,9 @@ void Calculator::sll(int src[])
 
 void Calculator::srl(int src[])
 {
-    getMask();
     int digit = 0;
     for (int i = 0; i <= 10; i++) {
-        if (mask[i] == ' ') {
-            // masked out
-            // continue;
-        } else {
+        if (mask[i] != ' ') {
             int newdigit = src[i];
             src[i] = digit;
             digit = newdigit;
@@ -145,14 +120,21 @@ void Calculator::srl(int src[])
     }
 }
 
+void Calculator::exchange(int src1[], int src2[])
+{
+    for (int i = 10; i >= 0; i--) {
+        if (mask[i] != ' ') {
+            int t = src1[i];
+            src1[i] = src2[i];
+            src2[i] = t;
+        }
+    }
+}
+
 void Calculator::writeFlag(int dest[], int val)
 {
-    getMask();
     for (int i = 10; i >= 0; i--) {
-        if (mask[i] == ' ') {
-            // masked out
-            // continue;
-        } else {
+        if (mask[i] != ' ') {
             // Flip dst if val == -1, otherwise set to val
             dest[i] = (val < 0) ? (1 - dest[i]) : val;
         }
@@ -161,7 +143,6 @@ void Calculator::writeFlag(int dest[], int val)
 
 void Calculator::compareFlags(int src1[], int src2[])
 {
-    getMask();
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
             if (src1[i] != src2[i]) {
@@ -172,21 +153,8 @@ void Calculator::compareFlags(int src1[], int src2[])
     }
 }
 
-void Calculator::exchange(int src1[], int src2[])
-{
-    getMask();
-    for (int i = 10; i >= 0; i--) {
-        if (mask[i] != ' ') {
-            int t = src1[i];
-            src1[i] = src2[i];
-            src2[i] = t;
-        }
-    }
-}
-
 void Calculator::testFlag(int src[])
 {
-    getMask();
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
             if (src[i]) {
@@ -208,6 +176,7 @@ void Calculator::step()
     // Serial.print(opcode);
     // Serial.print(F(" classbits:"));
     // Serial.print(classBits);
+    update_mask(instruction);
 
     if (classBits == 3) {
         // Register instruction
@@ -218,11 +187,11 @@ void Calculator::step()
             break;
         case 1: // AAKA: A+K -> A
             displayInstruction(2);
-            add(a, getMask(), a);
+            add(a, mask, a);
             break;
         case 2: // AAKC: A+K -> C
             displayInstruction(3);
-            add(a, getMask(), c);
+            add(a, mask, c);
             break;
         case 3:
             if (sinclair) { // ACBB C+B -> B
@@ -239,11 +208,11 @@ void Calculator::step()
             break;
         case 5: // ACKA: C+K -> A
             displayInstruction(7);
-            add(c, getMask(), a);
+            add(c, mask, a);
             break;
         case 6: // AKCB: C+K -> B
             displayInstruction(8);
-            add(c, getMask(), b);
+            add(c, mask, b);
             break;
         case 7: // SABA: A-B -> A
             displayInstruction(9);
@@ -255,7 +224,7 @@ void Calculator::step()
             break;
         case 9: // SAKA: A-K -> A
             displayInstruction(11);
-            sub(a, getMask(), a);
+            sub(a, mask, a);
             break;
         case 10: // SCBC: C-B -> C
             displayInstruction(12);
@@ -263,7 +232,7 @@ void Calculator::step()
             break;
         case 11: // SCKC: C-K -> C
             displayInstruction(13);
-            sub(c, getMask(), c);
+            sub(c, mask, c);
             break;
         case 12: // CAB: compare A-B
             displayInstruction(14);
@@ -271,7 +240,7 @@ void Calculator::step()
             break;
         case 13: // CAK: compare A-K
             displayInstruction(15);
-            compare(a, getMask());
+            compare(a, mask);
             break;
         case 14: // CCB: compare C-B
             displayInstruction(16);
@@ -279,19 +248,19 @@ void Calculator::step()
             break;
         case 15: // CCK: compare C-K
             displayInstruction(17);
-            compare(c, getMask());
+            compare(c, mask);
             break;
         case 16: // AKA: K -> A
             displayInstruction(18);
-            copy(getMask(), a);
+            copy(mask, a);
             break;
         case 17: // AKB: K -> B
             displayInstruction(19);
-            copy(getMask(), b);
+            copy(mask, b);
             break;
         case 18: // AKC: K -> C
             displayInstruction(20);
-            copy(getMask(), c);
+            copy(mask, c);
             break;
         case 19: // EXAB: exchange A and B
             displayInstruction(21);
@@ -324,7 +293,7 @@ void Calculator::step()
         case 26: // AKCN: A+K -> A until key down on N or D11 [sic]
             // Patent says sets condition if key down, but real behavior
             // is to set condition if addition overflows (i.e. no key down)
-            add(a, getMask(), a);
+            add(a, mask, a);
             if (keyStrobeKN()) {
                 displayInstruction(27);
                 // Advance to next instruction
@@ -343,7 +312,7 @@ void Calculator::step()
                 sub(c, b, a);
             } else { // AAKAH A+K -> A hex
                 displayInstruction(31);
-                add(a, getMask(), a, 1 /* hex */);
+                add(a, mask, a, 1 /* hex */);
                 cc = 0;
                 // ccMeaning = '';
             }
@@ -351,17 +320,17 @@ void Calculator::step()
         case 28:
             if (sinclair) { // SCKB C-K -> B
                 displayInstruction(32);
-                sub(c, getMask(), b);
+                sub(c, mask, b);
             } else { // SAKAH A-K -> A hex
                 displayInstruction(33);
-                sub(a, getMask(), a, 1 /* hex */);
+                sub(a, mask, a, 1 /* hex */);
                 cc = 0;
                 // ccMeaning = '';
             }
             break;
         case 29: // ACKC: C+K -> C
             displayInstruction(34);
-            add(c, getMask(), c);
+            add(c, mask, c);
             break;
         case 30:
             if (sinclair) { // AABC A+B -> C
@@ -523,8 +492,6 @@ void Calculator::step()
         // alert('Bad instruction code ' + instruction);
     }
     address = nextAddress;
-    // Put the mask for the next instruction in the model for display
-    getMask();
 
     // Update D state.
     dActive += 1;

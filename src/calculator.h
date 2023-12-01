@@ -49,7 +49,7 @@ public:
 
 private:
     // Update mask[] and return a pointer to it.
-    int *getMask();
+    void update_mask(unsigned instruction);
 
     // Arithmetic.
     void add(int src1[], int src2[], int dst[], bool hex = false);
