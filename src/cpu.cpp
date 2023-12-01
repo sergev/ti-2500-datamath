@@ -67,7 +67,7 @@ void Calculator::add(const Reg &x, const Reg &y, Reg &z, bool hex_flag)
 {
     bool carry = false;
 
-    for (int i = 10; i >= 0; i--) {
+    for (int i = REG_LEN - 1; i >= 0; i--) {
         if (mask[i] != ' ') {
             int result = x[i] + y[i] + carry;
             if (!hex_flag && result >= 10) {
@@ -92,7 +92,7 @@ void Calculator::sub(const Reg &x, const Reg &y, Reg &z, bool hex_flag)
 {
     bool borrow = false;
 
-    for (int i = 10; i >= 0; i--) {
+    for (int i = REG_LEN - 1; i >= 0; i--) {
         if (mask[i] != ' ') {
             int result = x[i] - y[i] - borrow;
             if (result < 0) {
@@ -121,7 +121,7 @@ void Calculator::compare(const Reg &x, const Reg &y)
 
 void Calculator::copy(const Reg &x, Reg &z)
 {
-    for (int i = 10; i >= 0; i--) {
+    for (int i = REG_LEN - 1; i >= 0; i--) {
         if (mask[i] != ' ') {
             z[i] = x[i];
         }
@@ -131,7 +131,7 @@ void Calculator::copy(const Reg &x, Reg &z)
 void Calculator::sll(Reg &x)
 {
     int digit = 0;
-    for (int i = 10; i >= 0; i--) {
+    for (int i = REG_LEN - 1; i >= 0; i--) {
         if (mask[i] != ' ') {
             int newdigit = x[i];
             x[i] = digit;
@@ -143,7 +143,7 @@ void Calculator::sll(Reg &x)
 void Calculator::srl(Reg &x)
 {
     int digit = 0;
-    for (int i = 0; i <= 10; i++) {
+    for (int i = 0; i < REG_LEN; i++) {
         if (mask[i] != ' ') {
             int newdigit = x[i];
             x[i] = digit;
@@ -154,7 +154,7 @@ void Calculator::srl(Reg &x)
 
 void Calculator::exchange(Reg &x, Reg &y)
 {
-    for (int i = 10; i >= 0; i--) {
+    for (int i = REG_LEN - 1; i >= 0; i--) {
         if (mask[i] != ' ') {
             int t = x[i];
             x[i] = y[i];
@@ -168,7 +168,7 @@ void Calculator::exchange(Reg &x, Reg &y)
 //
 void Calculator::set_flags(Reg &x, int val)
 {
-    for (int i = 10; i >= 0; i--) {
+    for (int i = REG_LEN - 1; i >= 0; i--) {
         if (mask[i] != ' ') {
             x[i] = (val < 0) ? (1 - x[i]) : val;
         }
@@ -177,7 +177,7 @@ void Calculator::set_flags(Reg &x, int val)
 
 void Calculator::compare_flags(const Reg &x, const Reg &y)
 {
-    for (int i = 10; i >= 0; i--) {
+    for (int i = REG_LEN - 1; i >= 0; i--) {
         if (mask[i] != ' ') {
             if (x[i] != y[i]) {
                 condition_code = true;
@@ -189,7 +189,7 @@ void Calculator::compare_flags(const Reg &x, const Reg &y)
 
 void Calculator::test_flags(const Reg &x)
 {
-    for (int i = 10; i >= 0; i--) {
+    for (int i = REG_LEN - 1; i >= 0; i--) {
         if (mask[i] != ' ') {
             if (x[i]) {
                 condition_code = true;

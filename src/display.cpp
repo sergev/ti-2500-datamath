@@ -7,11 +7,11 @@ std::string Calculator::get_display() const
     std::stringstream out;
     bool zeroSuppress = true;
 
-std::cout << "--- a  = " << a << std::endl;
-std::cout << "--- b  = " << b << std::endl;
-std::cout << "--- c  = " << c << std::endl;
-std::cout << "--- af = " << af << std::endl;
-std::cout << "--- bf = " << bf << std::endl;
+    //std::cout << "--- a  = " << a << std::endl;
+    //std::cout << "--- b  = " << b << std::endl;
+    //std::cout << "--- c  = " << c << std::endl;
+    //std::cout << "--- af = " << af << std::endl;
+    //std::cout << "--- bf = " << bf << std::endl;
 
     for (int i = 0; i < 9; i++) {
         if (i == 8 || a[i] != 0) {
