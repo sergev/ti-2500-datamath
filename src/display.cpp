@@ -1,7 +1,7 @@
 #include <sstream>
 #include "calculator.h"
 
-std::string Calculator_t::get_display() const
+std::string Calculator::get_display() const
 {
     std::stringstream out;
     bool zeroSuppress = true;

@@ -1,56 +1,49 @@
 #include <iostream>
 #include "calculator.h"
 
-bool opsWithK(unsigned opcode)
+static bool opsWithK(unsigned opcode)
 {
-    return (LISTOPSWITHK & (1UL << opcode));
+    // OPS WITH K: 1:AAKA 2:AAKC 5:ACKA 6:ACKB 9: 11:
+    // const unsigned long LISTOPSWITHK = 000111100000001111010101001100110b;
+    static const unsigned long LISTOPSWITHK = 1007135334;
+
+    return (LISTOPSWITHK >> opcode) & 1;
 }
 
-unsigned int getInstruction(unsigned int PC)
+int *Calculator::getMask()
 {
-    return objectCode[PC];
-}
-
-unsigned getMaskNum(const Calculator_t &calc)
-{
-    return getInstruction(calc.address) & 0x0f;
-}
-
-int *getMask(Calculator_t &calc)
-{
-    unsigned int instruction = getInstruction(calc.address);
-    unsigned classBits = instruction >> 9;
-    unsigned opcode = (instruction >> 4) & 0x1f;
+    unsigned instruction = objectCode[address];
+    unsigned classBits   = instruction >> 9;
+    unsigned opcode      = (instruction >> 4) & 0x1f;
 
     if (classBits == 3 || (classBits == 2 && opcode > 18 && opcode != 21 && opcode != 22)) {
-        unsigned maskno = getMaskNum(calc);
+        unsigned maskno = instruction & 0x0f;
 
         for (unsigned i = 0; i <= 10; i++) {
             char maskdigit = masks[maskno][i];
 
             if (maskdigit == ' ') {
-                calc.mask[i] = maskdigit;
+                mask[i] = maskdigit;
             } else if (classBits == 3 && opsWithK(opcode)) {
                 // Register instruction
-                calc.mask[i] = maskdigit - '0';
-                ;
+                mask[i] = maskdigit - '0';
             } else {
-                calc.mask[i] = '*';
+                mask[i] = '*';
             }
         }
     } else {
-        calc.mask[0] = 0;
+        mask[0] = 0;
     }
 
-    return calc.mask;
+    return mask;
 }
 
-void add(Calculator_t &calc, int src1[], int src2[], int dst[], bool hex = false)
+void Calculator::add(int src1[], int src2[], int dst[], bool hex)
 {
     unsigned carry = 0;
-    getMask(calc);
+    getMask();
     for (int i = 10; i >= 0; i--) {
-        if (calc.mask[i] == ' ') {
+        if (mask[i] == ' ') {
             // masked out
             // continue;
         } else {
@@ -68,17 +61,17 @@ void add(Calculator_t &calc, int src1[], int src2[], int dst[], bool hex = false
         }
     }
     if (carry) {
-        calc.cc = carry;
-        // calc.ccMeaning = carry ? 'overflow' : 'no overflow';
+        cc = carry;
+        // ccMeaning = carry ? 'overflow' : 'no overflow';
     }
 }
 
-void sub(Calculator_t &calc, int src1[], int src2[], int dst[], bool hex = false)
+void Calculator::sub(int src1[], int src2[], int dst[], bool hex)
 {
     unsigned borrow = 0;
-    getMask(calc);
+    getMask();
     for (int i = 10; i >= 0; i--) {
-        if (calc.mask[i] == ' ') {
+        if (mask[i] == ' ') {
             // masked out
             // continue;
         } else {
@@ -93,25 +86,25 @@ void sub(Calculator_t &calc, int src1[], int src2[], int dst[], bool hex = false
         }
     }
     if (borrow) {
-        calc.cc = borrow;
-        // calc.ccMeaning = borrow ? 'borrow' : 'no borrow';
+        cc = borrow;
+        // ccMeaning = borrow ? 'borrow' : 'no borrow';
     }
 }
 
-void compare(Calculator_t &calc, int src1[], int src2[])
+void Calculator::compare(int src1[], int src2[])
 {
     int tmp[11] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-    sub(calc, src1, src2, tmp);
+    sub(src1, src2, tmp);
     // Compare sets condition if not borrow
-    // calc.ccMeaning = calc.cc ? "less than" : "not less than";
+    // ccMeaning = cc ? "less than" : "not less than";
 }
 
-void copy(Calculator_t &calc, int src[], int dst[])
+void Calculator::copy(int src[], int dst[])
 {
-    getMask(calc);
+    getMask();
     for (int i = 10; i >= 0; i--) {
-        if (calc.mask[i] == ' ') {
+        if (mask[i] == ' ') {
             // masked out
             // continue;
         } else {
@@ -120,12 +113,12 @@ void copy(Calculator_t &calc, int src[], int dst[])
     }
 }
 
-void sll(Calculator_t &calc, int src[])
+void Calculator::sll(int src[])
 {
-    getMask(calc);
+    getMask();
     int digit = 0;
     for (int i = 10; i >= 0; i--) {
-        if (calc.mask[i] == ' ') {
+        if (mask[i] == ' ') {
             // masked out
             // continue;
         } else {
@@ -136,12 +129,12 @@ void sll(Calculator_t &calc, int src[])
     }
 }
 
-void srl(Calculator_t &calc, int src[])
+void Calculator::srl(int src[])
 {
-    getMask(calc);
+    getMask();
     int digit = 0;
     for (int i = 0; i <= 10; i++) {
-        if (calc.mask[i] == ' ') {
+        if (mask[i] == ' ') {
             // masked out
             // continue;
         } else {
@@ -152,11 +145,11 @@ void srl(Calculator_t &calc, int src[])
     }
 }
 
-void writeFlag(Calculator_t &calc, int dest[], int val)
+void Calculator::writeFlag(int dest[], int val)
 {
-    getMask(calc);
+    getMask();
     for (int i = 10; i >= 0; i--) {
-        if (calc.mask[i] == ' ') {
+        if (mask[i] == ' ') {
             // masked out
             // continue;
         } else {
@@ -166,34 +159,24 @@ void writeFlag(Calculator_t &calc, int dest[], int val)
     }
 }
 
-void compareFlags(Calculator_t &calc, int src1[], int src2[])
+void Calculator::compareFlags(int src1[], int src2[])
 {
-    int cc = 0;
-    getMask(calc);
+    getMask();
     for (int i = 10; i >= 0; i--) {
-        if (calc.mask[i] == ' ') {
-            // masked out
-            // continue;
-        } else {
+        if (mask[i] != ' ') {
             if (src1[i] != src2[i]) {
                 cc = 1;
+                // ccMeaning = 'flags not equal';
             }
         }
     }
-    if (cc) {
-        calc.cc = 1;
-        // calc.ccMeaning = 'flags not equal';
-    }
 }
 
-void exchange(Calculator_t &calc, int src1[], int src2[])
+void Calculator::exchange(int src1[], int src2[])
 {
-    getMask(calc);
+    getMask();
     for (int i = 10; i >= 0; i--) {
-        if (calc.mask[i] == ' ') {
-            // masked out
-            // continue;
-        } else {
+        if (mask[i] != ' ') {
             int t = src1[i];
             src1[i] = src2[i];
             src2[i] = t;
@@ -201,43 +184,22 @@ void exchange(Calculator_t &calc, int src1[], int src2[])
     }
 }
 
-void testFlag(Calculator_t &calc, int src[])
+void Calculator::testFlag(int src[])
 {
-    int cc = 0;
-    getMask(calc);
+    getMask();
     for (int i = 10; i >= 0; i--) {
-        if (calc.mask[i] == ' ') {
-            // masked out
-            // continue;
-        } else {
+        if (mask[i] != ' ') {
             if (src[i]) {
                 cc = 1;
+                // ccMeaning = 'flag set';
             }
         }
     }
-    /* Only update cc if bit set */
-    if (cc) {
-        calc.cc = cc;
-        // calc.ccMeaning = 'flag set';
-    }
 }
 
-void updateD(Calculator_t &calc)
+void Calculator::step()
 {
-    for (int i = 10; i >= 0; i--) {
-        calc.d[i] = 1;
-    }
-
-    calc.dActive += 1;
-    if (calc.dActive > 10) {
-        calc.dActive = 1;
-    }
-    calc.d[calc.dActive - 1] = 0;
-}
-
-void Calculator_t::step()
-{
-    unsigned instruction = getInstruction(address);
+    unsigned instruction = objectCode[address];
     unsigned classBits = instruction >> 9;
     unsigned opcode = (instruction >> 4) & 0x1f;
     unsigned nextAddress = address + 1;
@@ -252,119 +214,117 @@ void Calculator_t::step()
         switch (opcode) {
         case 0: // AABA: A+B -> A
             displayInstruction(1);
-            add(*this, a, b, a);
+            add(a, b, a);
             break;
         case 1: // AAKA: A+K -> A
             displayInstruction(2);
-            add(*this, a, getMask(*this), a);
+            add(a, getMask(), a);
             break;
         case 2: // AAKC: A+K -> C
             displayInstruction(3);
-            add(*this, a, getMask(*this), c);
+            add(a, getMask(), c);
             break;
         case 3:
             if (sinclair) { // ACBB C+B -> B
                 displayInstruction(4);
-                add(*this, c, b, b);
+                add(c, b, b);
             } else { // ABOA: B -> A
                 displayInstruction(5);
-                copy(*this, b, a);
+                copy(b, a);
             }
             break;
         case 4: // ABOC: B -> C
             displayInstruction(6);
-            copy(*this, b, c);
+            copy(b, c);
             break;
         case 5: // ACKA: C+K -> A
             displayInstruction(7);
-            add(*this, c, getMask(*this), a);
+            add(c, getMask(), a);
             break;
         case 6: // AKCB: C+K -> B
             displayInstruction(8);
-            add(*this, c, getMask(*this), b);
+            add(c, getMask(), b);
             break;
         case 7: // SABA: A-B -> A
             displayInstruction(9);
-            sub(*this, a, b, a);
+            sub(a, b, a);
             break;
         case 8: // SABC: A-B -> C
             displayInstruction(10);
-            sub(*this, a, b, c);
+            sub(a, b, c);
             break;
         case 9: // SAKA: A-K -> A
             displayInstruction(11);
-            sub(*this, a, getMask(*this), a);
+            sub(a, getMask(), a);
             break;
         case 10: // SCBC: C-B -> C
             displayInstruction(12);
-            sub(*this, c, b, c);
+            sub(c, b, c);
             break;
         case 11: // SCKC: C-K -> C
             displayInstruction(13);
-            sub(*this, c, getMask(*this), c);
+            sub(c, getMask(), c);
             break;
         case 12: // CAB: compare A-B
             displayInstruction(14);
-            compare(*this, a, b);
+            compare(a, b);
             break;
         case 13: // CAK: compare A-K
             displayInstruction(15);
-            compare(*this, a, getMask(*this));
+            compare(a, getMask());
             break;
         case 14: // CCB: compare C-B
             displayInstruction(16);
-            compare(*this, c, b);
+            compare(c, b);
             break;
         case 15: // CCK: compare C-K
             displayInstruction(17);
-            compare(*this, c, getMask(*this));
+            compare(c, getMask());
             break;
         case 16: // AKA: K -> A
             displayInstruction(18);
-            copy(*this, getMask(*this), a);
+            copy(getMask(), a);
             break;
         case 17: // AKB: K -> B
             displayInstruction(19);
-            copy(*this, getMask(*this), b);
+            copy(getMask(), b);
             break;
         case 18: // AKC: K -> C
             displayInstruction(20);
-            copy(*this, getMask(*this), c);
+            copy(getMask(), c);
             break;
         case 19: // EXAB: exchange A and B
             displayInstruction(21);
-            exchange(*this, a, b);
+            exchange(a, b);
             break;
         case 20: // SLLA: shift A left
             displayInstruction(22);
-            sll(*this, a);
+            sll(a);
             break;
         case 21: // SLLB: shift B left
             displayInstruction(23);
-            sll(*this, b);
+            sll(b);
             break;
         case 22: // SLLC: shift C left
             displayInstruction(24);
-            sll(*this, c);
+            sll(c);
             break;
         case 23: // SRLA: shift A right
             displayInstruction(25);
-            srl(*this, a);
+            srl(a);
             break;
         case 24: // SRLB: shift B right
             displayInstruction(26);
-            srl(*this, b);
+            srl(b);
             break;
         case 25: // SRLC: shift C right
             displayInstruction(66);
-            srl(*this, c);
+            srl(c);
             break;
         case 26: // AKCN: A+K -> A until key down on N or D11 [sic]
             // Patent says sets condition if key down, but real behavior
             // is to set condition if addition overflows (i.e. no key down)
-            // display_on = 0; //comment this line to glitch the display when a number key
-            // is pressed (SINCLAIR behavior: actual hardware behavior)
-            add(*this, a, getMask(*this), a);
+            add(a, getMask(), a);
             if (keyStrobeKN()) {
                 displayInstruction(27);
                 // Advance to next instruction
@@ -380,10 +340,10 @@ void Calculator_t::step()
         case 27:
             if (sinclair) { // SCBA C-B -> A
                 displayInstruction(30);
-                sub(*this, c, b, a);
+                sub(c, b, a);
             } else { // AAKAH A+K -> A hex
                 displayInstruction(31);
-                add(*this, a, getMask(*this), a, 1 /* hex */);
+                add(a, getMask(), a, 1 /* hex */);
                 cc = 0;
                 // ccMeaning = '';
             }
@@ -391,28 +351,28 @@ void Calculator_t::step()
         case 28:
             if (sinclair) { // SCKB C-K -> B
                 displayInstruction(32);
-                sub(*this, c, getMask(*this), b);
+                sub(c, getMask(), b);
             } else { // SAKAH A-K -> A hex
                 displayInstruction(33);
-                sub(*this, a, getMask(*this), a, 1 /* hex */);
+                sub(a, getMask(), a, 1 /* hex */);
                 cc = 0;
                 // ccMeaning = '';
             }
             break;
         case 29: // ACKC: C+K -> C
             displayInstruction(34);
-            add(*this, c, getMask(*this), c);
+            add(c, getMask(), c);
             break;
         case 30:
             if (sinclair) { // AABC A+B -> C
                 displayInstruction(35);
-                add(*this, a, b, c);
+                add(a, b, c);
                 break;
             }
         case 31:
             if (sinclair) { // ACBC C+B -> C
                 displayInstruction(36);
-                add(*this, c, b, c);
+                add(c, b, c);
                 break;
             }
         default:
@@ -428,7 +388,6 @@ void Calculator_t::step()
             displayInstruction(38);
             break;
         case 17: // WAITDK: wait for display key
-            //display_on = 0;
             if (keyPressed == DK) {
                 // Jump
                 displayInstruction(39);
@@ -452,11 +411,11 @@ void Calculator_t::step()
             break;
         case 19: // SFB: set flag B
             displayInstruction(43);
-            writeFlag(*this, bf, 1);
+            writeFlag(bf, 1);
             break;
         case 20: // SFA: set flag A
             displayInstruction(44);
-            writeFlag(*this, af, 1);
+            writeFlag(af, 1);
             break;
         case 21: // SYNC (SYNCH): hold address until end of D10
             displayInstruction(45);
@@ -467,7 +426,6 @@ void Calculator_t::step()
             // ccMeaning = '';
             break;
         case 22:                      // SCAN (SCANNO): wait for key
-            //display_on = 1; // Reset display power off latch
             if (keyStrobeKO() || keyStrobeKN() || keyStrobeKP()) {
                 displayInstruction(46);
                 cc = 1;
@@ -484,38 +442,38 @@ void Calculator_t::step()
             break;
         case 23: // ZFB: zero flag B
             displayInstruction(48);
-            writeFlag(*this, bf, 0);
+            writeFlag(bf, 0);
             break;
         case 24: // ZFA: zero flag A
             displayInstruction(49);
-            writeFlag(*this, af, 0);
+            writeFlag(af, 0);
             break;
         case 25: // TFB: test flag B
             displayInstruction(50);
-            testFlag(*this, bf);
+            testFlag(bf);
             break;
         case 26: // TFA: test flag A
             displayInstruction(51);
-            testFlag(*this, af);
+            testFlag(af);
             break;
         case 27: // FFB: flip flag B
             displayInstruction(52);
-            writeFlag(*this, bf, -1 /* flip */);
+            writeFlag(bf, -1 /* flip */);
             break;
         case 28: // FFA: flip flag A
             displayInstruction(67);
-            writeFlag(*this, af, -1 /* flip */);
+            writeFlag(af, -1 /* flip */);
             break;
         case 29: // CF: compare flags
             displayInstruction(53);
-            compareFlags(*this, af, bf);
+            compareFlags(af, bf);
             break;
         case 30: // NOP
             displayInstruction(54);
             break;
         case 31: // EXF: exchange flags
             displayInstruction(55);
-            exchange(*this, af, bf);
+            exchange(af, bf);
             break;
         default:
             // bad instruction
@@ -545,7 +503,6 @@ void Calculator_t::step()
         // Jump if key down on KO (BKO)
         displayInstruction(61);
         if (keyStrobeKO()) {
-            //display_on = 0;
             displayInstruction(62);
             nextAddress = instruction & 0x1ff;
         }
@@ -555,7 +512,6 @@ void Calculator_t::step()
         // Jump if key down on KP (BKP)
         displayInstruction(63);
         if (keyStrobeKP()) {
-            //display_on = 0;
             displayInstruction(64);
             nextAddress = instruction & 0x1ff;
         }
@@ -568,10 +524,13 @@ void Calculator_t::step()
     }
     address = nextAddress;
     // Put the mask for the next instruction in the model for display
-    // mask = getMask(*this);
-    getMask(*this);
-    // Update D state
-    updateD(*this);
+    getMask();
+
+    // Update D state.
+    dActive += 1;
+    if (dActive > 10) {
+        dActive = 1;
+    }
 
     displayInstruction(68); // if printing is enabled, do a println after executing a line of code
 }
@@ -579,7 +538,7 @@ void Calculator_t::step()
 //
 // Run the code until stopped on wait.
 //
-void Calculator_t::run()
+void Calculator::run()
 {
     if (keyPressed == 'C') {
         // Reset the calculator: start from address 0.

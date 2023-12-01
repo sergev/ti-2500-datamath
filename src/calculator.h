@@ -8,8 +8,8 @@
 #define DK 1
 
 // ORIGINAL SINCLAIR DATA
-class Calculator_t {
-public:
+class Calculator {
+private:
     bool sinclair{};
 
     // Important: Array order matches display order, not bit order.
@@ -17,10 +17,8 @@ public:
     int a[11]{};  // Register A
     int b[11]{};  // Register B
     int c[11]{};  // Register C
-    int af[11]{}; // Flags A
-    int bf[11]{}; // Flags A
-
-    int d[11] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    int af[11]{}; // A flags
+    int bf[11]{}; // B flags
 
     unsigned dActive{ 1 }; // Currently active D value 1-11. d[dActive-1] == 0
     int cc{};
@@ -29,8 +27,7 @@ public:
     unsigned int address{}; // Program Counter
     int mask[MASK_LENGTH]{};
 
-    bool resetinprogress{};
-
+public:
     // Get contents of the display.
     std::string get_display() const;
 
@@ -49,12 +46,24 @@ public:
     bool keyStrobeKN() const; // Keys 1 2 3 4 5 6 7 8 9
     bool keyStrobeKO() const; // Keys 0 . = + - * / C CE
     bool keyStrobeKP() const; // Unused
+
+private:
+    // Update mask[] and return a pointer to it.
+    int *getMask();
+
+    // Arithmetic.
+    void add(int src1[], int src2[], int dst[], bool hex = false);
+    void sub(int src1[], int src2[], int dst[], bool hex = false);
+    void compare(int src1[], int src2[]);
+    void copy(int src[], int dst[]);
+    void sll(int src[]);
+    void srl(int src[]);
+    void writeFlag(int dest[], int val);
+    void compareFlags(int src1[], int src2[]);
+    void exchange(int src1[], int src2[]);
+    void testFlag(int src[]);
 };
 
 extern const unsigned int objectCode[320];
 
 extern const char masks[NUMBER_OF_MASKS][MASK_LENGTH];
-
-// OPS WITH K: 1:AAKA 2:AAKC 5:ACKA 6:ACKB 9: 11:
-// const unsigned long LISTOPSWITHK = 000111100000001111010101001100110b;
-static const unsigned long LISTOPSWITHK = 1007135334;

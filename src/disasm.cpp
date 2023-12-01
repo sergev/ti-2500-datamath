@@ -1,7 +1,7 @@
 #include <iostream>
 #include "calculator.h"
 
-void Calculator_t::displayInstruction(unsigned instructionid)
+void Calculator::displayInstruction(unsigned instructionid)
 {
     auto &out = std::cout;
 

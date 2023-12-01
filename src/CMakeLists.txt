@@ -7,9 +7,9 @@ add_library(calculator STATIC
     display.cpp
 )
 
-# Build executable file
-add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} calculator)
+# Build executable file - TODO: disable for now
+#add_executable(${PROJECT_NAME} main.cpp)
+#target_link_libraries(${PROJECT_NAME} calculator)
 
 # Get git commit hash and revision count
 execute_process(

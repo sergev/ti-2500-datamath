@@ -7,7 +7,7 @@
 //
 // Press key on keyboard.
 //
-void Calculator_t::press_key(char k)
+void Calculator::press_key(char k)
 {
     std::cout << "--- Press key '" << k << "'" << std::endl;
     keyPressed = k;
@@ -17,7 +17,7 @@ void Calculator_t::press_key(char k)
 //
 // Poll keys 1 2 3 4 5 6 7 8 9
 //
-bool Calculator_t::keyStrobeKN() const
+bool Calculator::keyStrobeKN() const
 {
     switch (keyPressed) {
     case '1': return (dActive == 1); // TODO
@@ -36,7 +36,7 @@ bool Calculator_t::keyStrobeKN() const
 //
 // Poll keys 0 . = + - * / C CE
 //
-bool Calculator_t::keyStrobeKO() const
+bool Calculator::keyStrobeKO() const
 {
     switch (keyPressed) {
     case '0': return (dActive == 1); // TODO
@@ -55,7 +55,7 @@ bool Calculator_t::keyStrobeKO() const
 //
 // Poll keys: unused
 //
-bool Calculator_t::keyStrobeKP() const
+bool Calculator::keyStrobeKP() const
 {
     return false;
 }

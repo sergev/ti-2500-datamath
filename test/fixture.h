@@ -9,7 +9,7 @@
 class calc_test : public ::testing::Test {
 
 protected:
-    Calculator_t calc;
+    Calculator calc;
 
     void SetUp() override
     {

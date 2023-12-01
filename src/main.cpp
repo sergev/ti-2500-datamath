@@ -3,7 +3,7 @@
 
 int main()
 {
-    Calculator_t calc;
+    Calculator calc;
 
     for (;;) {
         calc.step();
