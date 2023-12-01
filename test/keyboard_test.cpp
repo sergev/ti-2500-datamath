@@ -83,7 +83,7 @@ TEST_F(calc_test, key_9)
     send_expect("9", "999999.");
     send_expect("9", "9999999.");
     send_expect("9", "99999999.");
-    //TODO: send_expect("9", "C99999999.");
+    send_expect("9", "C99999999.");
 }
 
 TEST_F(calc_test, key_0)

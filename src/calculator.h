@@ -96,3 +96,5 @@ private:
 
     friend std::ostream &operator<<(std::ostream &out, const Reg &x);
 };
+
+std::ostream &operator<<(std::ostream &out, const Calculator::Reg &x);
