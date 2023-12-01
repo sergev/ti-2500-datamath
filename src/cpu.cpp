@@ -518,7 +518,11 @@ void Calculator::step()
     if (trace_flag) {
         trace_state();
     }
+
     program_counter = next_pc;
+    if (program_counter == 0) {
+        throw std::runtime_error("Unexpected Reset");
+    }
 
     // Update D state.
     d_phase += 1;

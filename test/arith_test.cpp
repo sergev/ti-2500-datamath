@@ -81,7 +81,7 @@ TEST_F(calc_test, calculation_overflow)
     send_expect("10000=", "1.3635000"); // On TI-2500 Version 3: "u1.3635000"
 }
 
-TEST_F(calc_test, calculation_negative_overflow)
+TEST_F(calc_test, calculation_minus_overflow)
 {
     send_expect("-13635*", "-13635.");
     send_expect("10000=", "-1.3635000"); // On TI-2500 Version 3: "o1.3635000"
@@ -92,7 +92,7 @@ TEST_F(calc_test, entry_overflow)
     send_expect("123456789", "12345678."); // On TI-2500 Version 3: "C12345678."
 }
 
-TEST_F(calc_test, entry_negative_overflow)
+TEST_F(calc_test, entry_minus_overflow)
 {
     send_expect("-123456789", "12345678."); // On TI-2500 Version 3: "E12345678."
 }
