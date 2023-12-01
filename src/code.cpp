@@ -322,7 +322,7 @@
 // 316          SAKAH  OV1
 // 317          BILT   DPTPOS ; Will this ever be true???
 //
-const unsigned int objectCode[320] = {
+const unsigned Calculator::code_tab[320] = {
     1423, 1407, 1807, 1839, 5,    1755, 531,  1446, 12,   1992, 1992, 12,   1746, 21,   1757, 533,
     1916, 1693, 12,   1807, 1414, 1855, 1803, 1563, 1852, 1598, 1693, 542,  1884, 26,   1598, 1432,
     553,  1360, 1376, 545,  1360, 1376, 545,  1646, 1838, 1400, 1319, 1360, 1376, 616,  2013, 1777,
@@ -345,7 +345,7 @@ const unsigned int objectCode[320] = {
     670,  1754, 161,  1868, 1565, 305,  1916, 1693, 161,  1446, 21,   1992, 1992, 533,
 };
 
-const char masks[NUMBER_OF_MASKS][MASK_LENGTH] = {
+const char Calculator::mask_tab[NUMBER_OF_MASKS][MASK_LENGTH] = {
     { "          7" }, // M0
     { "         4 " }, // M1
     { "        1  " }, // M2

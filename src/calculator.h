@@ -19,19 +19,20 @@ private:
     int c[11]{};  // Register C
     int af[11]{}; // A flags
     int bf[11]{}; // B flags
+    int mask[MASK_LENGTH]{};
 
     unsigned dActive{ 1 }; // Currently active D value 1-11. d[dActive-1] == 0
     int cc{};
     char keyPressed{}; // Which key is currently pressed
 
     unsigned int address{}; // Program Counter
-    int mask[MASK_LENGTH]{};
+
+    static const unsigned code_tab[320];
+    static const char mask_tab[NUMBER_OF_MASKS][MASK_LENGTH];
 
 public:
     // Get contents of the display.
     std::string get_display() const;
-
-    void displayInstruction(unsigned instructionid);
 
     // Execute one instruction.
     void step();
@@ -41,11 +42,6 @@ public:
 
     // Press key on keyboard.
     void press_key(char k);
-
-    // Poll keyboard
-    bool keyStrobeKN() const; // Keys 1 2 3 4 5 6 7 8 9
-    bool keyStrobeKO() const; // Keys 0 . = + - * / C CE
-    bool keyStrobeKP() const; // Unused
 
 private:
     // Update mask[] and return a pointer to it.
@@ -62,8 +58,11 @@ private:
     void compareFlags(int src1[], int src2[]);
     void exchange(int src1[], int src2[]);
     void testFlag(int src[]);
+
+    // Poll keyboard
+    bool keyStrobeKN() const; // Keys 1 2 3 4 5 6 7 8 9
+    bool keyStrobeKO() const; // Keys 0 . = + - * / C CE
+    bool keyStrobeKP() const; // Unused
+
+    void displayInstruction(unsigned instructionid);
 };
-
-extern const unsigned int objectCode[320];
-
-extern const char masks[NUMBER_OF_MASKS][MASK_LENGTH];

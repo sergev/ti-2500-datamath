@@ -19,7 +19,7 @@ void Calculator::update_mask(unsigned instruction)
         unsigned maskno = instruction & 0x0f;
 
         for (unsigned i = 0; i <= 10; i++) {
-            char maskdigit = masks[maskno][i];
+            char maskdigit = mask_tab[maskno][i];
 
             if (maskdigit == ' ') {
                 mask[i] = maskdigit;
@@ -167,7 +167,7 @@ void Calculator::testFlag(int src[])
 
 void Calculator::step()
 {
-    unsigned instruction = objectCode[address];
+    unsigned instruction = code_tab[address];
     unsigned classBits = instruction >> 9;
     unsigned opcode = (instruction >> 4) & 0x1f;
     unsigned nextAddress = address + 1;
