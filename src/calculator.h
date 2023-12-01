@@ -34,8 +34,6 @@ private:
     Reg bf{};   // B flags
     Reg mask{}; // Mask value obtained from instruction opcode
 
-    unsigned d_phase{}; // D counter in range 0-9.
-
     // Flag for conditional branch.
     bool condition_code{};
 
@@ -44,6 +42,9 @@ private:
 
     // Program counter.
     unsigned program_counter{};
+
+    // D counter in range 0-9.
+    unsigned d_phase{};
 
     // Executable code.
     static const unsigned code_tab[];
@@ -54,6 +55,9 @@ private:
 private:
     // Set mask value from bits 3:0 of instruction.
     void decode_mask(unsigned instruction);
+
+    static bool op_with_mask(unsigned class_bits, unsigned opcode);
+    static bool op_with_k(unsigned opcode);
 
     // Arithmetic.
     void add(const Reg &x, const Reg &y, Reg &z, bool hex_flag = false);
@@ -72,5 +76,7 @@ private:
     bool keyStrobeKO() const; // Keys 0 . = + - * / C CE
     bool keyStrobeKP() const; // Unused
 
-    void trace_instruction(unsigned instruction);
+    void trace_instruction(unsigned instruction) const;
+    std::string disassemble_opcode(unsigned class_bits, unsigned opcode) const;
+    std::string disassemble_mask() const;
 };

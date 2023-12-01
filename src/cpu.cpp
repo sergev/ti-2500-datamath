@@ -1,13 +1,24 @@
 #include <iostream>
 #include "calculator.h"
 
-static bool opsWithK(unsigned opcode)
+bool Calculator::op_with_mask(unsigned class_bits, unsigned opcode)
 {
-    // OPS WITH K: 1:AAKA 2:AAKC 5:ACKA 6:ACKB 9: 11:
-    // const unsigned long LISTOPSWITHK = 000111100000001111010101001100110b;
-    static const unsigned long LISTOPSWITHK = 1007135334;
+    switch (class_bits) {
+    case 3:
+        return true;
+    case 2:
+        return (opcode > 18) && (opcode != 21) && (opcode != 22);
+    default:
+        return false;
+    }
+}
 
-    return (LISTOPSWITHK >> opcode) & 1;
+bool Calculator::op_with_k(unsigned opcode)
+{
+    // 0011'1100'0000'0111'1010'1010'0110'0110b;
+    static const unsigned long OPS_WITH_K = 0x3c07aa66;
+
+    return (OPS_WITH_K >> opcode) & 1;
 }
 
 void Calculator::decode_mask(unsigned instruction)
@@ -34,7 +45,7 @@ void Calculator::decode_mask(unsigned instruction)
     unsigned class_bits = instruction >> 9;
     unsigned opcode     = (instruction >> 4) & 0x1f;
 
-    if (class_bits == 3 || (class_bits == 2 && opcode > 18 && opcode != 21 && opcode != 22)) {
+    if (op_with_mask(class_bits, opcode)) {
         unsigned maskno = instruction & 0x0f;
 
         for (unsigned i = 0; i < REG_LEN; i++) {
@@ -42,11 +53,11 @@ void Calculator::decode_mask(unsigned instruction)
 
             if (maskdigit == ' ') {
                 mask[i] = maskdigit;
-            } else if (class_bits == 3 && opsWithK(opcode)) {
+            } else if (class_bits == 3 && op_with_k(opcode)) {
                 // Register instruction
                 mask[i] = maskdigit - '0';
             } else {
-                mask[i] = '*';
+                mask[i] = 'x';
             }
         }
     }
