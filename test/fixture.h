@@ -16,11 +16,9 @@ protected:
         calc.run();
     }
 
-    void send_expect(const std::string &send, const std::string &expect)
+    void send_expect(const std::string &input, const std::string &expect)
     {
-        for (char ch : send) {
-            calc.press_key(ch);
-        }
+        calc.send(input);
         EXPECT_EQ(calc.get_display(), expect);
     }
 };

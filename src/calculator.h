@@ -19,6 +19,9 @@ public:
     // Press key on keyboard.
     void press_key(char k);
 
+    // Send a string of input.
+    void send(const std::string &input);
+
 private:
     // Number of digits in calculator registers.
     static const unsigned REG_LEN = 11;

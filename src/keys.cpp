@@ -11,6 +11,21 @@ void Calculator::press_key(char k)
 }
 
 //
+// Send a string of input.
+// Ignore invalid characters.
+//
+void Calculator::send(const std::string &input)
+{
+    static const std::string valid_chars = "cC=+-*/eE.0123456789";
+
+    for (char ch : input) {
+        if (valid_chars.find(ch) != std::string::npos) {
+            press_key(ch);
+        }
+    }
+}
+
+//
 // Poll keys 1 2 3 4 5 6 7 8 9
 //
 bool Calculator::keyStrobeKN() const
