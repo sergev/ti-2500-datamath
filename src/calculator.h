@@ -1,21 +1,31 @@
+#include <array>
 #include <string>
 #include <cstdint>
-
-//
-// Number of digits in calculator registers.
-//
-const unsigned REG_LEN = 11;
-
-//
-// A register is represented as array of digits.
-//
-using Reg = std::array<int8_t, REG_LEN>;
 
 //
 // Model of TI-2500 calculator.
 //
 class Calculator {
+public:
+    // Get contents of the display.
+    std::string get_display() const;
+
+    // Execute one instruction.
+    void step();
+
+    // Run the code until stopped on wait.
+    void run();
+
+    // Press key on keyboard.
+    void press_key(char k);
+
 private:
+    // Number of digits in calculator registers.
+    static const unsigned REG_LEN = 11;
+
+    // A register is represented as array of digits.
+    using Reg = std::array<int8_t, REG_LEN>;
+
     // Hardware registers.
     Reg a{};    // Register A
     Reg b{};    // Register B
@@ -41,22 +51,9 @@ private:
     // Sinclair Scientific mode.
     const bool sinclair_flag{};
 
-public:
-    // Get contents of the display.
-    std::string get_display() const;
-
-    // Execute one instruction.
-    void step();
-
-    // Run the code until stopped on wait.
-    void run();
-
-    // Press key on keyboard.
-    void press_key(char k);
-
 private:
     // Set mask value from bits 3:0 of instruction.
-    void update_mask(unsigned instruction);
+    void decode_mask(unsigned instruction);
 
     // Arithmetic.
     void add(const Reg &x, const Reg &y, Reg &z, bool hex_flag = false);
@@ -75,5 +72,5 @@ private:
     bool keyStrobeKO() const; // Keys 0 . = + - * / C CE
     bool keyStrobeKP() const; // Unused
 
-    void displayInstruction(unsigned instructionid); // TODO: remove
+    void trace_instruction(unsigned instruction);
 };

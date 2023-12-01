@@ -1,18 +1,13 @@
 #include <iostream>
 #include "calculator.h"
 
-void Calculator::displayInstruction(unsigned instructionid)
+void Calculator::trace_instruction(unsigned instruction)
 {
-    auto &out = std::cout;
-
-    if (instructionid == 68) {
-        out << std::endl; // print end of line at end of void step()
-        return;
-    }
-
-    out << '(' << d_phase
-        << ") " << program_counter
-        << ": " << instructionid << "  ";
+    std::cout << '(' << d_phase
+              << ") " << program_counter
+              << ": " << instruction // TODO
+              << std::endl;
+#if 0
     switch (instructionid) {
     case 1:
         out << "AABA: A+B -> A";
@@ -286,4 +281,5 @@ void Calculator::displayInstruction(unsigned instructionid)
         out << "UNKNOWN INSTRUCTION ID";
         break;
     }
+#endif
 }

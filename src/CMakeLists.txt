@@ -2,9 +2,9 @@
 add_library(calculator STATIC
     code.cpp
     cpu.cpp
-    disasm.cpp
     keys.cpp
     display.cpp
+    trace.cpp
 )
 
 # Build executable file - TODO: disable for now
