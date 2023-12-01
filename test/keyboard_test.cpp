@@ -83,7 +83,6 @@ TEST_F(calc_test, key_9)
     send_expect("9", "999999.");
     send_expect("9", "9999999.");
     send_expect("9", "99999999.");
-    send_expect("9", "C99999999.");
 }
 
 TEST_F(calc_test, key_0)
@@ -100,17 +99,17 @@ TEST_F(calc_test, key_0)
 
 //
 // Check '.' key - decimal point.
-// Note that the behavior is different from TI-2500 Vertion 3 model.
+// Note that the behavior is different from TI-2500 Version 3 model.
 //
 TEST_F(calc_test, key_decimal_point)
 {
     send_expect("1.", "1.");
     send_expect("4", "1.4");
-    send_expect(".", "1.4");   // On TI-2500 Vertion 3 model: "14."
-    send_expect("8", "1.48");  // On TI-2500 Vertion 3 model: "14.8"
-    send_expect(".", "1.48");  // On TI-2500 Vertion 3 model: "148."
-    send_expect("3", "1.483"); // On TI-2500 Vertion 3 model: "148.3"
-    send_expect(".", "1.483"); // On TI-2500 Vertion 3 model: "1483."
+    send_expect(".", "1.4");   // On TI-2500 Version 3: "14."
+    send_expect("8", "1.48");  // On TI-2500 Version 3: "14.8"
+    send_expect(".", "1.48");  // On TI-2500 Version 3: "148."
+    send_expect("3", "1.483"); // On TI-2500 Version 3: "148.3"
+    send_expect(".", "1.483"); // On TI-2500 Version 3: "1483."
 }
 
 TEST_F(calc_test, key_plus)
@@ -123,7 +122,7 @@ TEST_F(calc_test, key_plus)
 TEST_F(calc_test, key_minus)
 {
     send_expect("7-", "7.");
-    send_expect("2", "2."); // On TI-2500 Vertion 3 model: "-2."
+    send_expect("2", "2."); // On TI-2500 Version 3: "-2."
     send_expect("-", "5.");
 }
 

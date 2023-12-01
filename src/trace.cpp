@@ -166,6 +166,8 @@ void Calculator::trace_instruction(unsigned instruction) const
     if (op_with_mask(class_bits, opcode)) {
         // Note: mask is already decoded.
         operand = disassemble_mask();
+    } else {
+        //TODO: print address
     }
 
     std::cout << '(' << d_phase
