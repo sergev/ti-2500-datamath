@@ -6,7 +6,6 @@
 //
 void Calculator::press_key(char k)
 {
-    std::cout << "--- Press key '" << k << "'" << std::endl;
     key_pressed = k;
     run();
 }

@@ -180,3 +180,62 @@ void Calculator::trace_instruction(unsigned instruction) const
     }
     std::cout << std::endl;
 }
+
+//
+// Print changed keyboard.
+//
+void Calculator::trace_keyboard()
+{
+    if (key_pressed != prev_key_pressed) {
+        std::cout << '(' << d_phase << ")      key '";
+        if (key_pressed) {
+            std::cout << key_pressed << "' pressed";
+        } else {
+            std::cout << prev_key_pressed << "' released";
+        }
+        std::cout << std::endl;
+        prev_key_pressed = key_pressed;
+    }
+}
+
+std::ostream &operator<<(std::ostream &out, const Calculator::Reg &x)
+{
+    for (unsigned i = 0; i < Calculator::REG_LEN; i++) {
+        if (i > 0) {
+            out << ' ';
+        }
+        out << (unsigned)x[i];
+    }
+    return out;
+}
+
+//
+// Print changed state.
+//
+void Calculator::trace_state()
+{
+    if (a != prev_a) {
+        std::cout << '(' << d_phase << ")              a  = " << a << std::endl;
+        prev_a = a;
+    }
+    if (b != prev_b) {
+        std::cout << '(' << d_phase << ")              b  = " << b << std::endl;
+        prev_b = b;
+    }
+    if (c != prev_c) {
+        std::cout << '(' << d_phase << ")              c  = " << c << std::endl;
+        prev_c = c;
+    }
+    if (af != prev_af) {
+        std::cout << '(' << d_phase << ")              af = " << af << std::endl;
+        prev_af = af;
+    }
+    if (bf != prev_bf) {
+        std::cout << '(' << d_phase << ")              bf = " << bf << std::endl;
+        prev_bf = bf;
+    }
+    if (condition_code != prev_condition_code) {
+        std::cout << '(' << d_phase << ")              cc = " << condition_code << std::endl;
+        prev_condition_code = condition_code;
+    }
+}

@@ -52,6 +52,18 @@ private:
     // Sinclair Scientific mode.
     const bool sinclair_flag{};
 
+    // Trace mode.
+    bool trace_flag{ true };
+
+    // Previous state for tracing.
+    Reg prev_a{};
+    Reg prev_b{};
+    Reg prev_c{};
+    Reg prev_af{};
+    Reg prev_bf{};
+    bool prev_condition_code{};
+    char prev_key_pressed{};
+
 private:
     // Set mask value from bits 3:0 of instruction.
     void decode_mask(unsigned instruction);
@@ -77,6 +89,10 @@ private:
     bool keyStrobeKP() const; // Unused
 
     void trace_instruction(unsigned instruction) const;
+    void trace_keyboard();
+    void trace_state();
     std::string disassemble_opcode(unsigned class_bits, unsigned opcode) const;
     std::string disassemble_mask() const;
+
+    friend std::ostream &operator<<(std::ostream &out, const Reg &x);
 };

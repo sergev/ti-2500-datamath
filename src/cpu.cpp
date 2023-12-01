@@ -207,7 +207,10 @@ void Calculator::step()
     unsigned next_pc = program_counter + 1;
 
     decode_mask(instruction);
-    trace_instruction(instruction);
+    if (trace_flag) {
+        trace_keyboard();
+        trace_instruction(instruction);
+    }
 
     if (class_bits == 3) {
         // Register instruction
@@ -511,6 +514,10 @@ void Calculator::step()
         // bad instruction
         // alert('Bad instruction code ' + instruction);
     }
+
+    if (trace_flag) {
+        trace_state();
+    }
     program_counter = next_pc;
 
     // Update D state.
@@ -539,7 +546,6 @@ void Calculator::run()
 
         if (program_counter == 34 && key_pressed) {
             // Release key to avoid infinite loop in debouncer.
-            std::cout << "--- Release key '" << key_pressed << "'" << std::endl;
             key_pressed = 0;
         }
 
