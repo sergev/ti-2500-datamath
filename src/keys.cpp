@@ -1,9 +1,6 @@
 #include <iostream>
 #include "calculator.h"
 
-//const char KeysKN[10] = "156789234";
-//const char KeysKO[10] = "C/*^E0v+-";
-
 //
 // Press key on keyboard.
 //
