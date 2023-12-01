@@ -12,13 +12,32 @@ static bool opsWithK(unsigned opcode)
 
 void Calculator::update_mask(unsigned instruction)
 {
+    // Bits 3:0 of instruction opcode are mapped into pre-defined mask values.
+    static const char mask_tab[16][REG_LEN+1] = {
+        { "          7" }, // M0
+        { "         4 " }, // M1
+        { "        1  " }, // M2
+        { "       0   " }, // M3
+        { "      0    " }, // M4
+        { "     0     " }, // M5
+        { "    0      " }, // M6
+        { " 0         " }, // M7
+        { "1          " }, // M8
+        { "        000" }, // M9
+        { "01         " }, // M10
+        { "000000001  " }, // M11
+        { "000000000  " }, // M12
+        { "         01" }, // M13
+        { "         00" }, // M14
+        { "00000000000" }, // M15
+    };
     unsigned classBits = instruction >> 9;
     unsigned opcode    = (instruction >> 4) & 0x1f;
 
     if (classBits == 3 || (classBits == 2 && opcode > 18 && opcode != 21 && opcode != 22)) {
         unsigned maskno = instruction & 0x0f;
 
-        for (unsigned i = 0; i <= 10; i++) {
+        for (unsigned i = 0; i < REG_LEN; i++) {
             char maskdigit = mask_tab[maskno][i];
 
             if (maskdigit == ' ') {
@@ -33,7 +52,7 @@ void Calculator::update_mask(unsigned instruction)
     }
 }
 
-void Calculator::add(int src1[], int src2[], int dst[], bool hex)
+void Calculator::add(const Reg &src1, const Reg &src2, Reg &dst, bool hex)
 {
     unsigned carry = 0;
     for (int i = 10; i >= 0; i--) {
@@ -57,7 +76,7 @@ void Calculator::add(int src1[], int src2[], int dst[], bool hex)
     }
 }
 
-void Calculator::sub(int src1[], int src2[], int dst[], bool hex)
+void Calculator::sub(const Reg &src1, const Reg &src2, Reg &dst, bool hex)
 {
     unsigned borrow = 0;
     for (int i = 10; i >= 0; i--) {
@@ -78,16 +97,16 @@ void Calculator::sub(int src1[], int src2[], int dst[], bool hex)
     }
 }
 
-void Calculator::compare(int src1[], int src2[])
+void Calculator::compare(const Reg &src1, const Reg &src2)
 {
-    int tmp[11] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    Reg tmp{};
 
     sub(src1, src2, tmp);
     // Compare sets condition if not borrow
     // ccMeaning = cc ? "less than" : "not less than";
 }
 
-void Calculator::copy(int src[], int dst[])
+void Calculator::copy(const Reg &src, Reg &dst)
 {
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
@@ -96,42 +115,42 @@ void Calculator::copy(int src[], int dst[])
     }
 }
 
-void Calculator::sll(int src[])
+void Calculator::sll(Reg &x)
 {
     int digit = 0;
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
-            int newdigit = src[i];
-            src[i] = digit;
+            int newdigit = x[i];
+            x[i] = digit;
             digit = newdigit;
         }
     }
 }
 
-void Calculator::srl(int src[])
+void Calculator::srl(Reg &x)
 {
     int digit = 0;
     for (int i = 0; i <= 10; i++) {
         if (mask[i] != ' ') {
-            int newdigit = src[i];
-            src[i] = digit;
+            int newdigit = x[i];
+            x[i] = digit;
             digit = newdigit;
         }
     }
 }
 
-void Calculator::exchange(int src1[], int src2[])
+void Calculator::exchange(Reg &x, Reg &y)
 {
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
-            int t = src1[i];
-            src1[i] = src2[i];
-            src2[i] = t;
+            int t = x[i];
+            x[i] = y[i];
+            y[i] = t;
         }
     }
 }
 
-void Calculator::writeFlag(int dest[], int val)
+void Calculator::writeFlag(Reg &dest, int val)
 {
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
@@ -141,7 +160,7 @@ void Calculator::writeFlag(int dest[], int val)
     }
 }
 
-void Calculator::compareFlags(int src1[], int src2[])
+void Calculator::compareFlags(const Reg &src1, const Reg &src2)
 {
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
@@ -153,7 +172,7 @@ void Calculator::compareFlags(int src1[], int src2[])
     }
 }
 
-void Calculator::testFlag(int src[])
+void Calculator::testFlag(const Reg &src)
 {
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
@@ -357,7 +376,7 @@ void Calculator::step()
             displayInstruction(38);
             break;
         case 17: // WAITDK: wait for display key
-            if (keyPressed == DK) {
+            if (keyPressed == 1) { // TODO: what does this mean?
                 // Jump
                 displayInstruction(39);
                 nextAddress = instruction & 0x1ff;

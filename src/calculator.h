@@ -1,34 +1,40 @@
 #include <string>
 #include <cstdint>
 
-#define NUMBER_OF_MASKS 16
-#define MASK_LENGTH 12
+//
+// Number of digits in calculator registers.
+//
+const unsigned REG_LEN = 11;
 
-// to use with keyPressed
-#define DK 1
+//
+// A register is represented as array of digits.
+//
+using Reg = std::array<int8_t, REG_LEN>;
 
-// ORIGINAL SINCLAIR DATA
 class Calculator {
 private:
-    bool sinclair{};
-
-    // Important: Array order matches display order, not bit order.
-    // I.e. a[0] is high-order digit S10, a[10] is low-order digit S0.
-    int a[11]{};  // Register A
-    int b[11]{};  // Register B
-    int c[11]{};  // Register C
-    int af[11]{}; // A flags
-    int bf[11]{}; // B flags
-    int mask[MASK_LENGTH]{};
+    // Hardware registers.
+    Reg a{};    // Register A
+    Reg b{};    // Register B
+    Reg c{};    // Register C
+    Reg af{};   // A flags
+    Reg bf{};   // B flags
+    Reg mask{}; // Mask value obtained from instruction opcode
 
     unsigned dActive{ 1 }; // Currently active D value 1-11. d[dActive-1] == 0
     int cc{};
-    char keyPressed{}; // Which key is currently pressed
 
-    unsigned int address{}; // Program Counter
+    // Which key is currently pressed.
+    char keyPressed{};
 
+    // Program counter.
+    unsigned int address{};
+
+    // Sinclair Scientific mode.
+    bool sinclair{};
+
+    // Executable code.
     static const unsigned code_tab[320];
-    static const char mask_tab[NUMBER_OF_MASKS][MASK_LENGTH];
 
 public:
     // Get contents of the display.
@@ -44,20 +50,20 @@ public:
     void press_key(char k);
 
 private:
-    // Update mask[] and return a pointer to it.
+    // Update mask and return a pointer to it.
     void update_mask(unsigned instruction);
 
     // Arithmetic.
-    void add(int src1[], int src2[], int dst[], bool hex = false);
-    void sub(int src1[], int src2[], int dst[], bool hex = false);
-    void compare(int src1[], int src2[]);
-    void copy(int src[], int dst[]);
-    void sll(int src[]);
-    void srl(int src[]);
-    void writeFlag(int dest[], int val);
-    void compareFlags(int src1[], int src2[]);
-    void exchange(int src1[], int src2[]);
-    void testFlag(int src[]);
+    void add(const Reg &src1, const Reg &src2, Reg &dst, bool hex = false);
+    void sub(const Reg &src1, const Reg &src2, Reg &dst, bool hex = false);
+    void compare(const Reg &src1, const Reg &src2);
+    void copy(const Reg &src, Reg &dst);
+    void sll(Reg &x);
+    void srl(Reg &x);
+    void exchange(Reg &x, Reg &y);
+    void writeFlag(Reg &dest, int val);
+    void compareFlags(const Reg &src1, const Reg &src2);
+    void testFlag(const Reg &src);
 
     // Poll keyboard
     bool keyStrobeKN() const; // Keys 1 2 3 4 5 6 7 8 9
