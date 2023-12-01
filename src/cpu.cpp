@@ -52,65 +52,67 @@ void Calculator::update_mask(unsigned instruction)
     }
 }
 
-void Calculator::add(const Reg &src1, const Reg &src2, Reg &dst, bool hex)
+void Calculator::add(const Reg &x, const Reg &y, Reg &z, bool hex_flag)
 {
-    unsigned carry = 0;
+    bool carry = false;
+
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
-            int result = src1[i] + src2[i] + carry;
-            if (!hex && result >= 10) {
+            int result = x[i] + y[i] + carry;
+            if (!hex_flag && result >= 10) {
                 result -= 10;
-                carry = 1;
-            } else if (hex && result >= 16) {
+                carry = true;
+            } else if (hex_flag && result >= 16) {
                 result -= 16;
-                carry = 1;
+                carry = true;
             } else {
-                carry = 0;
+                carry = false;
             }
-            dst[i] = result;
+            z[i] = result;
         }
     }
     if (carry) {
-        cc = carry;
+        condition_code = carry;
         // ccMeaning = carry ? 'overflow' : 'no overflow';
     }
 }
 
-void Calculator::sub(const Reg &src1, const Reg &src2, Reg &dst, bool hex)
+void Calculator::sub(const Reg &x, const Reg &y, Reg &z, bool hex_flag)
 {
-    unsigned borrow = 0;
+    bool borrow = false;
+
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
-            int result = src1[i] - src2[i] - borrow;
+            int result = x[i] - y[i] - borrow;
             if (result < 0) {
-                result += hex ? 16 : 10;
-                borrow = 1;
+                result += hex_flag ? 16 : 10;
+                borrow = true;
             } else {
-                borrow = 0;
+                borrow = false;
             }
-            dst[i] = result;
+            z[i] = result;
         }
     }
     if (borrow) {
-        cc = borrow;
+        condition_code = borrow;
         // ccMeaning = borrow ? 'borrow' : 'no borrow';
     }
 }
 
-void Calculator::compare(const Reg &src1, const Reg &src2)
+void Calculator::compare(const Reg &x, const Reg &y)
 {
     Reg tmp{};
 
-    sub(src1, src2, tmp);
+    sub(x, y, tmp);
     // Compare sets condition if not borrow
-    // ccMeaning = cc ? "less than" : "not less than";
+    // ccMeaning = condition_code ? "less than" : "not less than";
 }
 
-void Calculator::copy(const Reg &src, Reg &dst)
+void Calculator::copy(const Reg &x, Reg &z)
 {
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
-            dst[i] = src[i];
+            z[i] = x[i];
         }
     }
 }
@@ -150,34 +152,36 @@ void Calculator::exchange(Reg &x, Reg &y)
     }
 }
 
-void Calculator::writeFlag(Reg &dest, int val)
+//
+// Flip flags if val is negative, otherwise set to val.
+//
+void Calculator::set_flags(Reg &x, int val)
 {
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
-            // Flip dst if val == -1, otherwise set to val
-            dest[i] = (val < 0) ? (1 - dest[i]) : val;
+            x[i] = (val < 0) ? (1 - x[i]) : val;
         }
     }
 }
 
-void Calculator::compareFlags(const Reg &src1, const Reg &src2)
+void Calculator::compare_flags(const Reg &x, const Reg &y)
 {
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
-            if (src1[i] != src2[i]) {
-                cc = 1;
+            if (x[i] != y[i]) {
+                condition_code = true;
                 // ccMeaning = 'flags not equal';
             }
         }
     }
 }
 
-void Calculator::testFlag(const Reg &src)
+void Calculator::test_flags(const Reg &x)
 {
     for (int i = 10; i >= 0; i--) {
         if (mask[i] != ' ') {
-            if (src[i]) {
-                cc = 1;
+            if (x[i]) {
+                condition_code = true;
                 // ccMeaning = 'flag set';
             }
         }
@@ -186,10 +190,10 @@ void Calculator::testFlag(const Reg &src)
 
 void Calculator::step()
 {
-    unsigned instruction = code_tab[address];
+    unsigned instruction = code_tab[program_counter];
     unsigned classBits = instruction >> 9;
     unsigned opcode = (instruction >> 4) & 0x1f;
-    unsigned nextAddress = address + 1;
+    unsigned nextAddress = program_counter + 1;
 
     // Serial.print(F(" data:"));
     // Serial.print(opcode);
@@ -213,7 +217,7 @@ void Calculator::step()
             add(a, mask, c);
             break;
         case 3:
-            if (sinclair) { // ACBB C+B -> B
+            if (sinclair_flag) { // ACBB C+B -> B
                 displayInstruction(4);
                 add(c, b, b);
             } else { // ABOA: B -> A
@@ -316,34 +320,34 @@ void Calculator::step()
             if (keyStrobeKN()) {
                 displayInstruction(27);
                 // Advance to next instruction
-            } else if (dActive != 10) {
+            } else if (d_phase != REG_LEN - 2) {
                 displayInstruction(28);
                 // Hold at current instruction and continue scan
-                nextAddress = address;
+                nextAddress = program_counter;
             } else {
                 displayInstruction(29);
                 // For state d10, fall through
             }
             break;
         case 27:
-            if (sinclair) { // SCBA C-B -> A
+            if (sinclair_flag) { // SCBA C-B -> A
                 displayInstruction(30);
                 sub(c, b, a);
             } else { // AAKAH A+K -> A hex
                 displayInstruction(31);
-                add(a, mask, a, 1 /* hex */);
-                cc = 0;
+                add(a, mask, a, true /* hex */);
+                condition_code = false;
                 // ccMeaning = '';
             }
             break;
         case 28:
-            if (sinclair) { // SCKB C-K -> B
+            if (sinclair_flag) { // SCKB C-K -> B
                 displayInstruction(32);
                 sub(c, mask, b);
             } else { // SAKAH A-K -> A hex
                 displayInstruction(33);
-                sub(a, mask, a, 1 /* hex */);
-                cc = 0;
+                sub(a, mask, a, true /* hex */);
+                condition_code = false;
                 // ccMeaning = '';
             }
             break;
@@ -352,13 +356,13 @@ void Calculator::step()
             add(c, mask, c);
             break;
         case 30:
-            if (sinclair) { // AABC A+B -> C
+            if (sinclair_flag) { // AABC A+B -> C
                 displayInstruction(35);
                 add(a, b, c);
                 break;
             }
         case 31:
-            if (sinclair) { // ACBC C+B -> C
+            if (sinclair_flag) { // ACBC C+B -> C
                 displayInstruction(36);
                 add(c, b, c);
                 break;
@@ -376,85 +380,85 @@ void Calculator::step()
             displayInstruction(38);
             break;
         case 17: // WAITDK: wait for display key
-            if (keyPressed == 1) { // TODO: what does this mean?
+            if (key_pressed == 1) { // TODO: what does this mean?
                 // Jump
                 displayInstruction(39);
                 nextAddress = instruction & 0x1ff;
             } else {
                 // Hold address until DK pressed
                 displayInstruction(40);
-                nextAddress = address;
+                nextAddress = program_counter;
             }
             break;
         case 18: // WAITNO: wait for key or address register overflow
-            if (keyStrobeKO() || keyStrobeKN() || keyStrobeKP()) {
+            if (key_pressed) {
                 // Jump
                 displayInstruction(41);
                 nextAddress = instruction & 0x1ff;
             } else {
                 // Hold address until key pressed or address overflow (TODO)
                 displayInstruction(42);
-                nextAddress = address;
+                nextAddress = program_counter;
             }
             break;
         case 19: // SFB: set flag B
             displayInstruction(43);
-            writeFlag(bf, 1);
+            set_flags(bf, 1);
             break;
         case 20: // SFA: set flag A
             displayInstruction(44);
-            writeFlag(af, 1);
+            set_flags(af, 1);
             break;
         case 21: // SYNC (SYNCH): hold address until end of D10
             displayInstruction(45);
-            if (dActive != 10) {
-                nextAddress = address;
+            if (d_phase != REG_LEN - 2) {
+                nextAddress = program_counter;
             }
-            cc = 0;
+            condition_code = false;
             // ccMeaning = '';
             break;
         case 22:                      // SCAN (SCANNO): wait for key
-            if (keyStrobeKO() || keyStrobeKN() || keyStrobeKP()) {
+            if (key_pressed) {
                 displayInstruction(46);
-                cc = 1;
+                condition_code = true;
                 // ccMeaning = 'key';
             } else {
                 displayInstruction(47);
-                cc = 0;
+                condition_code = false;
                 // ccMeaning = 'no key';
-                if (dActive != 10) {
+                if (d_phase != REG_LEN - 2) {
                     // Hold address until end of D10
-                    nextAddress = address;
+                    nextAddress = program_counter;
                 }
             }
             break;
         case 23: // ZFB: zero flag B
             displayInstruction(48);
-            writeFlag(bf, 0);
+            set_flags(bf, 0);
             break;
         case 24: // ZFA: zero flag A
             displayInstruction(49);
-            writeFlag(af, 0);
+            set_flags(af, 0);
             break;
         case 25: // TFB: test flag B
             displayInstruction(50);
-            testFlag(bf);
+            test_flags(bf);
             break;
         case 26: // TFA: test flag A
             displayInstruction(51);
-            testFlag(af);
+            test_flags(af);
             break;
         case 27: // FFB: flip flag B
             displayInstruction(52);
-            writeFlag(bf, -1 /* flip */);
+            set_flags(bf, -1 /* flip */);
             break;
         case 28: // FFA: flip flag A
             displayInstruction(67);
-            writeFlag(af, -1 /* flip */);
+            set_flags(af, -1 /* flip */);
             break;
         case 29: // CF: compare flags
             displayInstruction(53);
-            compareFlags(af, bf);
+            compare_flags(af, bf);
             break;
         case 30: // NOP
             displayInstruction(54);
@@ -472,21 +476,21 @@ void Calculator::step()
     } else if (classBits == 0) {
         // jump if reset: BIU, BIZ, BIGE, BINC, BIE, BET
         displayInstruction(57);
-        if (cc == 0) {
+        if (!condition_code) {
             displayInstruction(58);
             nextAddress = instruction & 0x1ff;
         }
-        cc = 0; // Clear after jump
-                             // ccMeaning = '';
+        condition_code = false; // Clear after jump
+        // ccMeaning = '';
     } else if (classBits == 1) {
         // jump if set: BID, BIO, BILT, BIC, BINE
         displayInstruction(59);
-        if (cc == 1) {
+        if (condition_code) {
             displayInstruction(60);
             nextAddress = instruction & 0x1ff;
         }
-        cc = 0; // Clear after jump
-                             // ccMeaning = '';
+        condition_code = false; // Clear after jump
+        // ccMeaning = '';
     } else if ((instruction >> 7) == 8) {
         // Jump if key down on KO (BKO)
         displayInstruction(61);
@@ -494,8 +498,8 @@ void Calculator::step()
             displayInstruction(62);
             nextAddress = instruction & 0x1ff;
         }
-        cc = 0; // Clear after jump
-                             // ccMeaning = '';
+        condition_code = false; // Clear after jump
+        // ccMeaning = '';
     } else if ((instruction >> 7) == 9) {
         // Jump if key down on KP (BKP)
         displayInstruction(63);
@@ -503,19 +507,19 @@ void Calculator::step()
             displayInstruction(64);
             nextAddress = instruction & 0x1ff;
         }
-        cc = 0; // Clear after jump
-                             // ccMeaning = '';
+        condition_code = false; // Clear after jump
+        // ccMeaning = '';
     } else {
         displayInstruction(65);
         // bad instruction
         // alert('Bad instruction code ' + instruction);
     }
-    address = nextAddress;
+    program_counter = nextAddress;
 
     // Update D state.
-    dActive += 1;
-    if (dActive > 10) {
-        dActive = 1;
+    d_phase += 1;
+    if (d_phase > REG_LEN - 2) {
+        d_phase = 0;
     }
 
     displayInstruction(68); // if printing is enabled, do a println after executing a line of code
@@ -526,30 +530,30 @@ void Calculator::step()
 //
 void Calculator::run()
 {
-    if (keyPressed == 'C' || keyPressed == 'c') {
+    if (key_pressed == 'C' || key_pressed == 'c') {
         // Reset the calculator: start from address 0.
-        address = 0;
-        keyPressed = 0;
-        dActive = 1;
+        program_counter = 0;
+        key_pressed = 0;
+        d_phase = 0;
     }
 
-    unsigned last_addr = address;
+    unsigned last_addr = program_counter;
     unsigned same_addr_count = 0;
     do {
         step();
 
-        if (address == 34 && keyPressed) {
+        if (program_counter == 34 && key_pressed) {
             // Release key to avoid infinite loop in debouncer.
-            std::cout << "--- Release key '" << keyPressed << "'" << std::endl;
-            keyPressed = 0;
+            std::cout << "--- Release key '" << key_pressed << "'" << std::endl;
+            key_pressed = 0;
         }
 
         // Stop when waiting on the same address for too long.
-        if (address == last_addr) {
+        if (program_counter == last_addr) {
             same_addr_count++;
         } else {
             same_addr_count = 0;
-            last_addr = address;
+            last_addr = program_counter;
         }
     } while (same_addr_count < 11);
 }

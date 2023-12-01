@@ -11,6 +11,9 @@ const unsigned REG_LEN = 11;
 //
 using Reg = std::array<int8_t, REG_LEN>;
 
+//
+// Model of TI-2500 calculator.
+//
 class Calculator {
 private:
     // Hardware registers.
@@ -21,20 +24,22 @@ private:
     Reg bf{};   // B flags
     Reg mask{}; // Mask value obtained from instruction opcode
 
-    unsigned dActive{ 1 }; // Currently active D value 1-11. d[dActive-1] == 0
-    int cc{};
+    unsigned d_phase{}; // D counter in range 0-9.
+
+    // Flag for conditional branch.
+    bool condition_code{};
 
     // Which key is currently pressed.
-    char keyPressed{};
+    char key_pressed{};
 
     // Program counter.
-    unsigned int address{};
-
-    // Sinclair Scientific mode.
-    bool sinclair{};
+    unsigned program_counter{};
 
     // Executable code.
-    static const unsigned code_tab[320];
+    static const unsigned code_tab[];
+
+    // Sinclair Scientific mode.
+    const bool sinclair_flag{};
 
 public:
     // Get contents of the display.
@@ -50,25 +55,25 @@ public:
     void press_key(char k);
 
 private:
-    // Update mask and return a pointer to it.
+    // Set mask value from bits 3:0 of instruction.
     void update_mask(unsigned instruction);
 
     // Arithmetic.
-    void add(const Reg &src1, const Reg &src2, Reg &dst, bool hex = false);
-    void sub(const Reg &src1, const Reg &src2, Reg &dst, bool hex = false);
-    void compare(const Reg &src1, const Reg &src2);
-    void copy(const Reg &src, Reg &dst);
+    void add(const Reg &x, const Reg &y, Reg &z, bool hex_flag = false);
+    void sub(const Reg &x, const Reg &y, Reg &z, bool hex_flag = false);
+    void compare(const Reg &x, const Reg &y);
+    void copy(const Reg &x, Reg &z);
     void sll(Reg &x);
     void srl(Reg &x);
     void exchange(Reg &x, Reg &y);
-    void writeFlag(Reg &dest, int val);
-    void compareFlags(const Reg &src1, const Reg &src2);
-    void testFlag(const Reg &src);
+    void set_flags(Reg &x, int val);
+    void compare_flags(const Reg &x, const Reg &y);
+    void test_flags(const Reg &x);
 
-    // Poll keyboard
+    // Poll keyboard.
     bool keyStrobeKN() const; // Keys 1 2 3 4 5 6 7 8 9
     bool keyStrobeKO() const; // Keys 0 . = + - * / C CE
     bool keyStrobeKP() const; // Unused
 
-    void displayInstruction(unsigned instructionid);
+    void displayInstruction(unsigned instructionid); // TODO: remove
 };
