@@ -1,3 +1,7 @@
+#pragma once
+#ifndef _CALCULATOR_H_
+#define _CALCULATOR_H_
+
 #include <array>
 #include <string>
 #include <cstdint>
@@ -163,3 +167,5 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &out, const Calculator::Reg &x);
+
+#endif // _CALCULATOR_H_
