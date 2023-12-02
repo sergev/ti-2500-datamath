@@ -13,9 +13,14 @@ protected:
 
     void SetUp() override
     {
+        // Enable trace.
+        calc.set_trace(true);
         calc.run();
     }
 
+    //
+    // Send input, check output.
+    //
     void send_expect(const std::string &input, const std::string &expect)
     {
         calc.send(input);

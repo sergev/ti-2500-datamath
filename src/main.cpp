@@ -5,31 +5,22 @@ int main()
 {
     Calculator calc;
 
+    std::cout << "Try calculations on TI-2500.\n";
+    std::cout << "Don't forget '=' at the end!\n";
+    std::cout << "Use q to quit.\n";
+    std::cout << "\n";
+
+    calc.run();
     for (;;) {
-        calc.step();
+        std::cout << calc.get_display() << std::endl;
 
-        if (calc.address == 42) { // WAITNO instruction: waiting for input
-            std::cout << calc.get_display() << std::endl;
-        }
-#if 0
-        char key = readKey(calc);
+        std::string input;
+        std::cout << "> " << std::flush;
+        std::getline(std::cin, input);
 
-        if (calc.resetinprogress) {
-            if (calc.address > 8) {
-                calc.resetinprogress = false;
-            }
+        if (input == "q" || input == "Q" || std::cin.eof()) {
+            break;
         }
-
-        if (key == 'C') {
-            if (calc.resetinprogress == false) {
-                calc.address = 0;
-                calc.keyStrobeKN = 0;
-                calc.keyStrobeKO = 0;
-                calc.keyStrobeKP = 0;
-                calc.dActive = 1;
-                calc.resetinprogress = true;
-            }
-        }
-#endif
+        calc.send(input);
     }
 }

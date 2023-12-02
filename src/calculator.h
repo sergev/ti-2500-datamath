@@ -22,6 +22,9 @@ public:
     // Send a string of input.
     void send(const std::string &input);
 
+    // Enable tracing.
+    void set_trace(bool flag) { trace_flag = flag; }
+
 private:
     // Number of digits in calculator registers.
     static const unsigned REG_LEN = 11;
@@ -56,7 +59,7 @@ private:
     const bool sinclair_flag{};
 
     // Trace mode.
-    bool trace_flag{ true };
+    bool trace_flag{ false };
 
     // Previous state for tracing.
     Reg prev_a{};

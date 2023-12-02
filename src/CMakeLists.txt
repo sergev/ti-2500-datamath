@@ -7,9 +7,9 @@ add_library(calculator STATIC
     trace.cpp
 )
 
-# Build executable file - TODO: disable for now
-#add_executable(${PROJECT_NAME} main.cpp)
-#target_link_libraries(${PROJECT_NAME} calculator)
+# Build executable file
+add_executable(${PROJECT_NAME} main.cpp)
+target_link_libraries(${PROJECT_NAME} calculator)
 
 # Get git commit hash and revision count
 execute_process(
@@ -28,7 +28,7 @@ set_source_files_properties(session.cpp PROPERTIES COMPILE_FLAGS
     -DVERSION_STRING=\\"${CMAKE_PROJECT_VERSION}.${GIT_REVCOUNT}-${GIT_HASH}\\"
 )
 
-#install(TARGETS
-#    ${PROJECT_NAME}
-#    DESTINATION bin
-#)
+install(TARGETS
+    ${PROJECT_NAME}
+    DESTINATION bin
+)
