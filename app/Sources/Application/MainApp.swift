@@ -10,7 +10,7 @@ struct MainApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .navigationTitle("TI-2500")
+                .navigationTitle("TI-2500 Datamath")
                 .onDisappear {
                     terminateApp()
                 }
