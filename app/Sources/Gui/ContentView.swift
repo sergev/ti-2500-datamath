@@ -8,7 +8,7 @@ let u = 10.0
 
 // Colors
 let darkGray = Color(red: 0.16, green: 0.16, blue: 0.16, opacity: 1)
-let red = Color(red: 0.88, green: 0.3, blue: 0.35, opacity: 1)
+let red = Color(red: 1, green: 0.3, blue: 0.35, opacity: 1)
 let gray = Color(red: 0.69, green: 0.64, blue: 0.57, opacity: 1)
 let cream = Color(red: 0.8, green: 0.8, blue: 0.8, opacity: 1)
 let orange = Color(red: 0.78, green: 0.49, blue: 0.26, opacity: 1)
@@ -61,6 +61,7 @@ public struct ContentView: View {
                 .padding(u)
                 .foregroundColor(red)
                 .frame(width: 18*u, alignment: .trailing)
+                .textSelection(.enabled)
             HStack(spacing: u) {
                 Button("CE") {
                     proxy.send("e")
