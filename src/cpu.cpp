@@ -128,7 +128,7 @@ void Calculator::copy(const Reg &x, Reg &z)
     }
 }
 
-void Calculator::sll(Reg &x)
+void Calculator::shift_left(Reg &x)
 {
     int digit = 0;
     for (int i = REG_LEN - 1; i >= 0; i--) {
@@ -140,10 +140,10 @@ void Calculator::sll(Reg &x)
     }
 }
 
-void Calculator::srl(Reg &x)
+void Calculator::shift_right(Reg &x)
 {
     int digit = 0;
-    for (int i = 0; i < REG_LEN; i++) {
+    for (unsigned i = 0; i < REG_LEN; i++) {
         if (mask[i] != ' ') {
             int newdigit = x[i];
             x[i] = digit;
@@ -280,22 +280,22 @@ void Calculator::step()
             exchange(a, b);
             break;
         case OP_SLLA: // shift A left
-            sll(a);
+            shift_left(a);
             break;
         case OP_SLLB: // shift B left
-            sll(b);
+            shift_left(b);
             break;
         case OP_SLLC: // shift C left
-            sll(c);
+            shift_left(c);
             break;
         case OP_SRLA: // shift A right
-            srl(a);
+            shift_right(a);
             break;
         case OP_SRLB: // shift B right
-            srl(b);
+            shift_right(b);
             break;
         case OP_SRLC: // shift C right
-            srl(c);
+            shift_right(c);
             break;
         case OP_AKCN: // A+K -> A until key down on N or D11 [sic]
             // Patent says sets condition if key down, but real behavior

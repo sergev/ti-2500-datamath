@@ -82,8 +82,8 @@ private:
     void sub(const Reg &x, const Reg &y, Reg &z, bool hex_flag = false);
     void compare(const Reg &x, const Reg &y);
     void copy(const Reg &x, Reg &z);
-    void sll(Reg &x);
-    void srl(Reg &x);
+    void shift_left(Reg &x);
+    void shift_right(Reg &x);
     void exchange(Reg &x, Reg &y);
     void set_flags(Reg &x, int val);
     void compare_flags(const Reg &x, const Reg &y);
