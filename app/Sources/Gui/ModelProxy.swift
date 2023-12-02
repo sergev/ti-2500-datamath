@@ -12,16 +12,15 @@ class ModelProxy: ObservableObject {
     // Allocate C++ object.
     private var calc = Calculator()
 
+    // Show initial display contents.
     func setup() {
         calc.run()
         display = String(calc.get_display())
     }
 
-    func increment() {
-        //TODO: calc.increment()
-    }
-
-    func decrement() {
-        //TODO: calc.decrement()
+    // Press key.
+    func send(_ ch: Character) {
+        calc.press_key(CChar(ch.asciiValue!))
+        display = String(calc.get_display())
     }
 }

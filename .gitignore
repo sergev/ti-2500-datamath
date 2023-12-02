@@ -1,3 +1,4 @@
 *.o
 ti2500
 build
+.build
