@@ -10,6 +10,7 @@ struct MainApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .navigationTitle("TI-2500")
                 .onDisappear {
                     terminateApp()
                 }
