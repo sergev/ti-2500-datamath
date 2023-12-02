@@ -15,6 +15,7 @@ test:   build
 
 clean:
 	rm -rf build
+	make -C src clean
 
 build:
 	mkdir $@
