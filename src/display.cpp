@@ -7,6 +7,7 @@ std::string Calculator::get_display() const
     std::stringstream out;
     bool zeroSuppress = true;
 
+    // Print registers for debug.
     //std::cout << "--- a  = " << a << std::endl;
     //std::cout << "--- b  = " << b << std::endl;
     //std::cout << "--- c  = " << c << std::endl;

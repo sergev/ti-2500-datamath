@@ -84,7 +84,7 @@ void Calculator::add(const Reg &x, const Reg &y, Reg &z, bool hex_flag)
     }
     if (carry) {
         condition_code = carry;
-        // ccMeaning = carry ? 'overflow' : 'no overflow';
+        // True: overflow, false: no overflow.
     }
 }
 
@@ -106,7 +106,7 @@ void Calculator::sub(const Reg &x, const Reg &y, Reg &z, bool hex_flag)
     }
     if (borrow) {
         condition_code = borrow;
-        // ccMeaning = borrow ? 'borrow' : 'no borrow';
+        // True: borrow, false: no borrow.
     }
 }
 
@@ -115,8 +115,8 @@ void Calculator::compare(const Reg &x, const Reg &y)
     Reg tmp{};
 
     sub(x, y, tmp);
-    // Compare sets condition if not borrow
-    // ccMeaning = condition_code ? "less than" : "not less than";
+    // Compare sets condition if not borrow.
+    // True: less than, false: greater or equal.
 }
 
 void Calculator::copy(const Reg &x, Reg &z)
@@ -181,7 +181,7 @@ void Calculator::compare_flags(const Reg &x, const Reg &y)
         if (mask[i] != ' ') {
             if (x[i] != y[i]) {
                 condition_code = true;
-                // ccMeaning = 'flags not equal';
+                // Flags not equal.
             }
         }
     }
@@ -193,7 +193,7 @@ void Calculator::test_flags(const Reg &x)
         if (mask[i] != ' ') {
             if (x[i]) {
                 condition_code = true;
-                // ccMeaning = 'flag set';
+                // Flag set.
             }
         }
     }
@@ -215,117 +215,89 @@ void Calculator::step()
     if (class_bits == 3) {
         // Register instruction
         switch (opcode) {
-        case 0:
-            // AABA: A+B -> A
+        case OP_AABA: // A+B -> A
             add(a, b, a);
             break;
-        case 1:
-            // AAKA: A+K -> A
+        case OP_AAKA: // A+K -> A
             add(a, mask, a);
             break;
-        case 2:
-            // AAKC: A+K -> C
+        case OP_AAKC: // A+K -> C
             add(a, mask, c);
             break;
-        case 3:
+        case OP_ABOA: // B -> A
             if (sinclair_flag) {
-                // ACBB C+B -> B
-                add(c, b, b);
+                add(c, b, b); // ACBB C+B -> B
             } else {
-                // ABOA: B -> A
                 copy(b, a);
             }
             break;
-        case 4:
-            // ABOC: B -> C
+        case OP_ABOC: // B -> C
             copy(b, c);
             break;
-        case 5:
-            // ACKA: C+K -> A
+        case OP_ACKA: // C+K -> A
             add(c, mask, a);
             break;
-        case 6:
-            // AKCB: C+K -> B
+        case OP_AKCB: // C+K -> B
             add(c, mask, b);
             break;
-        case 7:
-            // SABA: A-B -> A
+        case OP_SABA: // A-B -> A
             sub(a, b, a);
             break;
-        case 8:
-            // SABC: A-B -> C
+        case OP_SABC: // A-B -> C
             sub(a, b, c);
             break;
-        case 9:
-            // SAKA: A-K -> A
+        case OP_SAKA: // A-K -> A
             sub(a, mask, a);
             break;
-        case 10:
-            // SCBC: C-B -> C
+        case OP_SCBC: // C-B -> C
             sub(c, b, c);
             break;
-        case 11:
-            // SCKC: C-K -> C
+        case OP_SCKC: // C-K -> C
             sub(c, mask, c);
             break;
-        case 12:
-            // CAB: compare A-B
+        case OP_CAB: // compare A-B
             compare(a, b);
             break;
-        case 13:
-            // CAK: compare A-K
+        case OP_CAK: // compare A-K
             compare(a, mask);
             break;
-        case 14:
-            // CCB: compare C-B
+        case OP_CCB: // compare C-B
             compare(c, b);
             break;
-        case 15:
-            // CCK: compare C-K
+        case OP_CCK: // compare C-K
             compare(c, mask);
             break;
-        case 16:
-            // AKA: K -> A
+        case OP_AKA: // K -> A
             copy(mask, a);
             break;
-        case 17:
-            // AKB: K -> B
+        case OP_AKB: // K -> B
             copy(mask, b);
             break;
-        case 18:
-            // AKC: K -> C
+        case OP_AKC: // K -> C
             copy(mask, c);
             break;
-        case 19:
-            // EXAB: exchange A and B
+        case OP_EXAB: // exchange A and B
             exchange(a, b);
             break;
-        case 20:
-            // SLLA: shift A left
+        case OP_SLLA: // shift A left
             sll(a);
             break;
-        case 21:
-            // SLLB: shift B left
+        case OP_SLLB: // shift B left
             sll(b);
             break;
-        case 22:
-            // SLLC: shift C left
+        case OP_SLLC: // shift C left
             sll(c);
             break;
-        case 23:
-            // SRLA: shift A right
+        case OP_SRLA: // shift A right
             srl(a);
             break;
-        case 24:
-            // SRLB: shift B right
+        case OP_SRLB: // shift B right
             srl(b);
             break;
-        case 25:
-            // SRLC: shift C right
+        case OP_SRLC: // shift C right
             srl(c);
             break;
-        case 26:
-            // AKCN: A+K -> A until key down on N or D11 [sic]
+        case OP_AKCN: // A+K -> A until key down on N or D11 [sic]
             // Patent says sets condition if key down, but real behavior
             // is to set condition if addition overflows (i.e. no key down)
             add(a, mask, a);
@@ -338,58 +310,45 @@ void Calculator::step()
                 // For state d10, fall through
             }
             break;
-        case 27:
+        case OP_AAKAH: // A+K -> A hex
             if (sinclair_flag) {
-                // SCBA C-B -> A
-                sub(c, b, a);
+                sub(c, b, a); // C-B -> A -- Sinclair
             } else {
-                // AAKAH A+K -> A hex
                 add(a, mask, a, true /* hex */);
                 condition_code = false;
-                // ccMeaning = '';
             }
             break;
-        case 28:
+        case OP_SAKAH: // A-K -> A hex
             if (sinclair_flag) {
-                // SCKB C-K -> B
-                sub(c, mask, b);
+                sub(c, mask, b); // C-K -> B -- Sinclair
             } else {
-                // SAKAH A-K -> A hex
                 sub(a, mask, a, true /* hex */);
                 condition_code = false;
-                // ccMeaning = '';
             }
             break;
-        case 29:
-            // ACKC: C+K -> C
+        case OP_ACKC: // C+K -> C
             add(c, mask, c);
             break;
-        case 30:
+        case OP_AABC: // A+B -> C -- Sinclair
             if (sinclair_flag) {
-                // AABC A+B -> C
                 add(a, b, c);
                 break;
             }
-        case 31:
+        case OP_ACBC: // C+B -> C -- Sinclair
             if (sinclair_flag) {
-                // ACBC C+B -> C
                 add(c, b, c);
                 break;
             }
         default:
-            // bad instruction
-            // alert('Bad instruction ' + instruction);
-            break;
+            throw std::runtime_error("Bad class3 instruction");
         }
     } else if ((instruction >> 8) == 5) {
         // Flag instruction
         switch (opcode) {
-        case 16:
-            // NOP
+        case OP_NOP16: // no operation
             break;
-        case 17:
-            // WAITDK: wait for display key
-            if (key_pressed == 1) { // TODO: what does this mean?
+        case OP_WAITDK: // wait for display key - what does it mean?
+            if (key_pressed == 1) { // Never happens
                 // Jump
                 next_pc = instruction & 0x1ff;
             } else {
@@ -397,40 +356,34 @@ void Calculator::step()
                 next_pc = program_counter;
             }
             break;
-        case 18:
-            // WAITNO: wait for key or address register overflow
+        case OP_WAITNO: // wait for key
             if (key_pressed) {
                 // Jump
                 next_pc = instruction & 0x1ff;
             } else {
-                // Hold address until key pressed or address overflow (TODO)
+                // Hold address until key pressed
                 next_pc = program_counter;
             }
             break;
-        case 19:
-            // SFB: set flag B
+        case OP_SFB: // set flag B
             set_flags(bf, 1);
             break;
-        case 20:
-            // SFA: set flag A
+        case OP_SFA: // set flag A
             set_flags(af, 1);
             break;
-        case 21:
-            // SYNC (SYNCH): hold address until end of D10
+        case OP_SYNC: // hold address until end of D10
             if (d_phase != REG_LEN - 2) {
                 next_pc = program_counter;
             }
             condition_code = false;
-            // ccMeaning = '';
             break;
-        case 22:
-            // SCAN (SCANNO): wait for key
+        case OP_SCAN: // wait for key
             if (key_pressed) {
                 condition_code = true;
-                // ccMeaning = 'key';
+                // Key is pressed.
             } else {
                 condition_code = false;
-                // ccMeaning = 'no key';
+                // No key pressed.
 
                 if (d_phase != REG_LEN - 2) {
                     // Hold address until end of D10
@@ -438,45 +391,34 @@ void Calculator::step()
                 }
             }
             break;
-        case 23:
-            // ZFB: zero flag B
+        case OP_ZFB: // zero flag B
             set_flags(bf, 0);
             break;
-        case 24:
-            // ZFA: zero flag A
+        case OP_ZFA: // zero flag A
             set_flags(af, 0);
             break;
-        case 25:
-            // TFB: test flag B
+        case OP_TFB: // test flag B
             test_flags(bf);
             break;
-        case 26:
-            // TFA: test flag A
+        case OP_TFA: // test flag A
             test_flags(af);
             break;
-        case 27:
-            // FFB: flip flag B
+        case OP_FFB: // flip flag B
             set_flags(bf, -1 /* flip */);
             break;
-        case 28:
-            // FFA: flip flag A
+        case OP_FFA: // flip flag A
             set_flags(af, -1 /* flip */);
             break;
-        case 29:
-            // CF: compare flags
+        case OP_CF: // compare flags
             compare_flags(af, bf);
             break;
-        case 30:
-            // NOP
+        case OP_NOP30: // no operation
             break;
-        case 31:
-            // EXF: exchange flags
+        case OP_EXF: // exchange flags
             exchange(af, bf);
             break;
         default:
-            // bad instruction
-            // alert('Bad instruction ' + instruction);
-            break;
+            throw std::runtime_error("Bad class2 instruction");
         }
     } else if (class_bits == 0) {
         // jump if reset: BIU, BIZ, BIGE, BINC, BIE, BET
@@ -484,7 +426,6 @@ void Calculator::step()
             next_pc = instruction & 0x1ff;
         }
         condition_code = false; // Clear after jump
-        // ccMeaning = '';
 
     } else if (class_bits == 1) {
         // jump if set: BID, BIO, BILT, BIC, BINE
@@ -492,7 +433,6 @@ void Calculator::step()
             next_pc = instruction & 0x1ff;
         }
         condition_code = false; // Clear after jump
-        // ccMeaning = '';
 
     } else if ((instruction >> 7) == 8) {
         // Jump if key down on KO (BKO)
@@ -500,19 +440,16 @@ void Calculator::step()
             next_pc = instruction & 0x1ff;
         }
         condition_code = false; // Clear after jump
-        // ccMeaning = '';
 
     } else if ((instruction >> 7) == 9) {
-        // Jump if key down on KP (BKP)
+        // Jump if key down on KP (BKP) - unused
         if (keyStrobeKP()) {
             next_pc = instruction & 0x1ff;
         }
         condition_code = false; // Clear after jump
-        // ccMeaning = '';
 
     } else {
-        // bad instruction
-        // alert('Bad instruction code ' + instruction);
+        throw std::runtime_error("Bad instruction");
     }
 
     if (trace_flag) {
@@ -560,5 +497,5 @@ void Calculator::run()
             same_addr_count = 0;
             last_addr = program_counter;
         }
-    } while (same_addr_count < 11);
+    } while (same_addr_count < REG_LEN);
 }

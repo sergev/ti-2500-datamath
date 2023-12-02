@@ -12,7 +12,7 @@ int main()
 
     calc.run();
     for (;;) {
-        std::cout << calc.get_display() << std::endl;
+        std::cout << "        " << calc.get_display() << std::endl;
 
         std::string input;
         std::cout << "> " << std::flush;

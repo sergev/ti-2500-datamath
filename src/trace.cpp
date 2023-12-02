@@ -154,21 +154,39 @@ std::string Calculator::disassemble_mask() const
     return out.str();
 }
 
+std::string Calculator::disassemble_operand(unsigned instruction) const
+{
+    unsigned class_bits = instruction >> 9;
+    unsigned opcode     = (instruction >> 4) & 0x1f;
+
+    switch (class_bits) {
+    default:
+    case 0:
+    case 1:
+        // Print jump address.
+        return std::to_string(instruction & 0x1ff);
+    case 2:
+        if (opcode < 16) {
+            // Print jump address.
+            return std::to_string(instruction & 0x1ff);
+        }
+        // Fall through.
+    case 3:
+        if (op_with_mask(class_bits, opcode)) {
+            // Note: mask is already decoded.
+            return disassemble_mask();
+        }
+        return "";
+    }
+}
+
 void Calculator::trace_instruction(unsigned instruction) const
 {
     unsigned class_bits = instruction >> 9;
     unsigned opcode     = (instruction >> 4) & 0x1f;
     unsigned maskno     = instruction & 0x0f;
-
-    std::string name = disassemble_opcode(class_bits, opcode);
-
-    std::string operand;
-    if (op_with_mask(class_bits, opcode)) {
-        // Note: mask is already decoded.
-        operand = disassemble_mask();
-    } else {
-        //TODO: print address
-    }
+    std::string name    = disassemble_opcode(class_bits, opcode);
+    std::string operand = disassemble_operand(instruction);
 
     std::cout << '(' << d_phase
               << ") " << std::setw(3) << program_counter
@@ -189,7 +207,7 @@ void Calculator::trace_instruction(unsigned instruction) const
 void Calculator::trace_keyboard()
 {
     if (key_pressed != prev_key_pressed) {
-        std::cout << '(' << d_phase << ")      key '";
+        std::cout << '(' << d_phase << ")              key '";
         if (key_pressed) {
             std::cout << key_pressed << "' pressed";
         } else {

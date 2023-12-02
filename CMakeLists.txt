@@ -8,21 +8,21 @@ set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-Wall -Werror -Wshadow)
 
 #
-# TODO: Enable cppcheck by default
+# Enable cppcheck by default
 #
-#find_program(Cppcheck NAMES cppcheck)
-#if(NOT (Cppcheck MATCHES "NOTFOUND"))
-#    message(STATUS "Found Cppcheck: ${Cppcheck}")
-#    set(CMAKE_CXX_CPPCHECK "${Cppcheck}"
-#        "--std=c++17"
-#        "--enable=style"
-#        "--error-exitcode=1" # Fail on any issues
-#        "--inline-suppr" # Enable inline control like // cppcheck-suppress "id"
-#        "--quiet" # No progress report messages
-#        "--suppress=*:*/_deps/*" # Ignore issues in Googletest
-#        "--library=${CMAKE_SOURCE_DIR}/test/googletest.xml" # Parse TEST() macro properly
-#    )
-#endif()
+find_program(Cppcheck NAMES cppcheck)
+if(NOT (Cppcheck MATCHES "NOTFOUND"))
+    message(STATUS "Found Cppcheck: ${Cppcheck}")
+    set(CMAKE_CXX_CPPCHECK "${Cppcheck}"
+        "--std=c++20"
+        "--enable=style"
+        "--error-exitcode=1" # Fail on any issues
+        "--inline-suppr" # Enable inline control like // cppcheck-suppress "id"
+        "--quiet" # No progress report messages
+        "--suppress=*:*/_deps/*" # Ignore issues in Googletest
+        "--library=${CMAKE_SOURCE_DIR}/test/googletest.xml" # Parse TEST() macro properly
+    )
+endif()
 
 #
 # Download GoogleTest
