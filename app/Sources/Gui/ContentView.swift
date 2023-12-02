@@ -19,7 +19,7 @@ public struct ContentView: View {
         VStack(spacing: u) {
             Text("\(proxy.display)")
                 .lineLimit(1)
-                .font(.system(size: 3*u))
+                .font(.system(size: 2.8*u, design: .monospaced))
                 .padding(u)
                 .foregroundColor(red)
                 .frame(width: 20*u, alignment: .trailing)
