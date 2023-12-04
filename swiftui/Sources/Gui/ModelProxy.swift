@@ -1,5 +1,10 @@
 //
-//  ModelProxy.swift
+// Proxy object which connects Swift to the C++ code.
+//
+// Copyright (c) 2023 Serge Vakulenko <serge.vakulenko@gmail.com>
+//
+// This work is licensed under the terms of the MIT license.
+// For a copy, see <https://opensource.org/licenses/MIT>.
 //
 import Foundation
 import ModelCxx

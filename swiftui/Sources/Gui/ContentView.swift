@@ -1,41 +1,59 @@
 //
-//  ContentView.swift
+// Main window of the calculator.
+//
+// Copyright (c) 2023 Serge Vakulenko <serge.vakulenko@gmail.com>
+//
+// This work is licensed under the terms of the MIT license.
+// For a copy, see <https://opensource.org/licenses/MIT>.
 //
 import SwiftUI
 
+//
 // Sizes
+//
 let u = 10.0
 
+//
 // Colors
+//
 let darkGray = Color(red: 0.16, green: 0.16, blue: 0.16, opacity: 1)
 let red = Color(red: 1, green: 0.3, blue: 0.35, opacity: 1)
 let gray = Color(red: 0.69, green: 0.64, blue: 0.57, opacity: 1)
-let cream = Color(red: 0.8, green: 0.8, blue: 0.8, opacity: 1)
+let white = Color(red: 0.8, green: 0.8, blue: 0.8, opacity: 1)
 let orange = Color(red: 0.78, green: 0.49, blue: 0.26, opacity: 1)
 
+//
+// Button styles
+//
 struct GrayButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .frame(width: 3*u, height: 3*u)
             .background(RoundedRectangle(cornerRadius: 5.0).fill(gray)
+            .scaleEffect(configuration.isPressed ? 1.2 : 1)
+            .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
         )
     }
 }
 
-struct CreamButton: ButtonStyle {
+struct WhiteButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .frame(width: 3*u, height: 3*u)
-            .background(RoundedRectangle(cornerRadius: 5.0).fill(cream)
+            .background(RoundedRectangle(cornerRadius: 5.0).fill(white)
+            .scaleEffect(configuration.isPressed ? 1.2 : 1)
+            .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
         )
     }
 }
 
-struct WideCreamButton: ButtonStyle {
+struct WideWhiteButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .frame(width: 5*u, height: 3*u)
-            .background(RoundedRectangle(cornerRadius: 5.0).fill(cream)
+            .background(RoundedRectangle(cornerRadius: 5.0).fill(white)
+            .scaleEffect(configuration.isPressed ? 1.2 : 1)
+            .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
         )
     }
 }
@@ -45,10 +63,15 @@ struct WideOrangeButton: ButtonStyle {
         configuration.label
             .frame(width: 5*u, height: 3*u)
             .background(RoundedRectangle(cornerRadius: 5.0).fill(orange)
+            .scaleEffect(configuration.isPressed ? 1.2 : 1)
+            .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
         )
     }
 }
 
+//
+// Main window
+//
 public struct ContentView: View {
     @ObservedObject var proxy: ModelProxy = ModelProxy.shared
 
@@ -84,13 +107,13 @@ public struct ContentView: View {
             HStack(spacing: u) {
                 Button("7") {
                     proxy.send("7")
-                }.buttonStyle(CreamButton())
+                }.buttonStyle(WhiteButton())
                 Button("8") {
                     proxy.send("8")
-                }.buttonStyle(CreamButton())
+                }.buttonStyle(WhiteButton())
                 Button("9") {
                     proxy.send("9")
-                }.buttonStyle(CreamButton())
+                }.buttonStyle(WhiteButton())
                 Button("C") {
                     proxy.send("c")
                 }.buttonStyle(GrayButton())
@@ -98,13 +121,13 @@ public struct ContentView: View {
             HStack(spacing: u) {
                 Button("4") {
                     proxy.send("4")
-                }.buttonStyle(CreamButton())
+                }.buttonStyle(WhiteButton())
                 Button("5") {
                     proxy.send("5")
-                }.buttonStyle(CreamButton())
+                }.buttonStyle(WhiteButton())
                 Button("6") {
                     proxy.send("6")
-                }.buttonStyle(CreamButton())
+                }.buttonStyle(WhiteButton())
                 Button("-") {
                     proxy.send("-")
                 }.buttonStyle(GrayButton())
@@ -112,13 +135,13 @@ public struct ContentView: View {
             HStack(spacing: u) {
                 Button("1") {
                     proxy.send("1")
-                }.buttonStyle(CreamButton())
+                }.buttonStyle(WhiteButton())
                 Button("2") {
                     proxy.send("2")
-                }.buttonStyle(CreamButton())
+                }.buttonStyle(WhiteButton())
                 Button("3") {
                     proxy.send("3")
-                }.buttonStyle(CreamButton())
+                }.buttonStyle(WhiteButton())
                 Button("+") {
                     proxy.send("+")
                 }.buttonStyle(GrayButton())
@@ -126,10 +149,10 @@ public struct ContentView: View {
             HStack(spacing: u) {
                 Button("0") {
                     proxy.send("0")
-                }.buttonStyle(WideCreamButton())
-                Button(".") {
+                }.buttonStyle(WideWhiteButton())
+                Button("·") {
                     proxy.send(".")
-                }.buttonStyle(CreamButton())
+                }.buttonStyle(WhiteButton())
                 Button("=") {
                     proxy.send("=")
                 }.buttonStyle(WideOrangeButton())

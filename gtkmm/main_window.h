@@ -1,3 +1,11 @@
+//
+// Main GUI window of the calculator.
+//
+// Copyright (c) 2023 Serge Vakulenko <serge.vakulenko@gmail.com>
+//
+// This work is licensed under the terms of the MIT license.
+// For a copy, see <https://opensource.org/licenses/MIT>.
+//
 #pragma once
 #ifndef _MAIN_WINDOW_H_
 #define _MAIN_WINDOW_H_
