@@ -1,34 +1,26 @@
 #include "main_window.h"
 
-// IDs for the controls and the menu commands
-enum {
-    // menu items
-    Minimal_Quit = wxID_EXIT,
-
-    // it is important for the id corresponding to the "About" command to have
-    // this standard value as otherwise it won't be handled properly under Mac
-    // (where it is special and put into the "Apple" menu)
-    Minimal_About = wxID_ABOUT
-};
-
-// the event tables connect the wxWidgets events with the functions (event
-// handlers) which process them. It can be also done at run-time, but for the
-// simple menu events like this the static method is much simpler.
+//
+// Event table connects the wxWidgets events with functions which process them.
+//
 // clang-format off
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
-    EVT_MENU(Minimal_Quit,  MainWindow::OnQuit)
-    EVT_MENU(Minimal_About, MainWindow::OnAbout)
+    EVT_MENU(wxID_EXIT, MainWindow::OnQuit)
+    EVT_MENU(wxID_ABOUT, MainWindow::OnAbout)
 wxEND_EVENT_TABLE()
 // clang-format on
 
-// the application icon (under Windows it is in resources and even
-// though we could still include the XPM here it would be unused)
+//
+// The application icon.
+//
 #ifndef wxHAS_IMAGES_IN_RESOURCES
-#include "icon.xpm"
+#   include "icon.xpm"
 #endif
 
-    // frame constructor
-    MainWindow::MainWindow(const wxString &title)
+//
+// Frame constructor.
+//
+MainWindow::MainWindow(const wxString &title)
     : wxFrame(NULL, wxID_ANY, title)
 {
     // set the frame icon
@@ -40,9 +32,9 @@ wxEND_EVENT_TABLE()
 
     // the "About" item should be in the help menu
     wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(Minimal_About, "&About\tF1", "Show about dialog");
+    helpMenu->Append(wxID_ABOUT, "&About\tF1", "Show about dialog");
 
-    fileMenu->Append(Minimal_Quit, "E&xit\tAlt-X", "Quit this program");
+    fileMenu->Append(wxID_EXIT, "E&xit\tAlt-X", "Quit this program");
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar();
@@ -67,11 +59,12 @@ wxEND_EVENT_TABLE()
 #endif // wxUSE_STATUSBAR
 }
 
-// event handlers
-
+//
+// Event handlers.
+//
 void MainWindow::OnQuit(wxCommandEvent &WXUNUSED(event))
 {
-    // true is to force the frame to close
+    // True is to force the frame to close.
     Close(true);
 }
 
