@@ -2,3 +2,4 @@
 ti2500
 build
 .build
+*.swift-

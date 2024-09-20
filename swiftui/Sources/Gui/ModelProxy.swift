@@ -12,6 +12,7 @@ import ModelCxx
 class ModelProxy: ObservableObject {
     @Published var display: String = ""
 
+    @MainActor
     static let shared = ModelProxy()
 
     // Allocate C++ object.
