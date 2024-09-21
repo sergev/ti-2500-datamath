@@ -72,7 +72,7 @@ struct WideOrangeButton: ButtonStyle {
 //
 // Main window
 //
-public struct ContentView: View {
+public struct Content: View {
     @ObservedObject var proxy: ModelProxy = ModelProxy.shared
 
     public var body: some View {
@@ -173,5 +173,5 @@ public struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    Content()
 }

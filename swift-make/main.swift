@@ -14,16 +14,12 @@ struct MainApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            Content()
                 .navigationTitle("TI-2500 Datamath")
                 .onDisappear {
-                    terminateApp()
+                    exit(0)
                 }
         }
         .windowResizability(.contentSize)
-    }
-
-    private func terminateApp() {
-        NSApplication.shared.terminate(self)
     }
 }
