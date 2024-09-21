@@ -27,12 +27,12 @@ struct ToolbarView: View {
             .tooltip(Loc.mainMenu)
             .aboutDialog(
                 visible: $about,
-                app: "AdwaitaTemplate",
+                app: "TI-2500 Datamath",
                 developer: "david-swift",
                 version: "dev",
                 icon: .custom(name: "org.sergev.ti2500"),
-                website: .init(string: "https://github.com/AparokshaUI/AdwaitaTemplate")!,
-                issues: .init(string: "https://github.com/AparokshaUI/AdwaitaTemplate/issues")!
+                website: .init(string: "https://github.com/sergev/ti-2500-datamath")!,
+                issues: .init(string: "https://github.com/sergev/ti-2500-datamath/issues")!
             )
         }
     }

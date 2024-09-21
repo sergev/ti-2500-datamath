@@ -2,10 +2,10 @@
 Version=1.0
 Type=Application
 
-Name=Adwaita Template
-Comment=A template for creating GNOME apps with Swift
+Name=TI-2500 Datamath
+Comment=Emulator of TI-2500 calculator
 Categories=Development;GNOME;
 
 Icon=org.sergev.ti2500
-Exec=AdwaitaTemplate
+Exec=ti2500
 Terminal=false

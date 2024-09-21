@@ -2,8 +2,8 @@
 <component type="desktop-application">
   <id>org.sergev.ti2500</id>
 
-  <name>Adwaita Template</name>
-  <summary>A template for creating GNOME apps with Swift</summary>
+  <name>TI-2500 Datamath</name>
+  <summary>Emulator of TI-2500 calculator</summary>
 
   <metadata_license>MIT</metadata_license>
   <project_license>LGPL-3.0-or-later</project_license>

@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Adwaita Template",
+    name: "TI-2500 Datamath",
     platforms: [
         .macOS(.v13)
     ],
@@ -14,7 +14,7 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "AdwaitaTemplate",
+            name: "ti2500",
             dependencies: [
                 .product(name: "Adwaita", package: "Adwaita"),
                 .product(name: "Localized", package: "Localized")

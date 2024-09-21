@@ -4,7 +4,7 @@
 import Adwaita
 
 @main
-struct AdwaitaTemplate: App {
+struct CalculatorApp: App {
 
     let id = "org.sergev.ti2500"
     var app: GTUIApp!
@@ -18,6 +18,8 @@ struct AdwaitaTemplate: App {
                 }
         }
         .defaultSize(width: 450, height: 300)
+        .title("TI-2500 Datamath")
+        .quitShortcut()
+        .closeShortcut()
     }
-
 }

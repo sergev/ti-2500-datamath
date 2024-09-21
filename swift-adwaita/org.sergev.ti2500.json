@@ -6,7 +6,7 @@
   "sdk-extensions": [
     "org.freedesktop.Sdk.Extension.swift5"
   ],
-  "command": "AdwaitaTemplate",
+  "command": "ti2500",
   "finish-args": [
     "--share=ipc",
     "--socket=fallback-x11",
@@ -30,7 +30,7 @@
   ],
   "modules": [
     {
-      "name": "AdwaitaTemplate",
+      "name": "ti2500",
       "builddir": true,
       "buildsystem": "simple",
       "sources": [
@@ -41,8 +41,8 @@
       ],
       "build-commands": [
         "swift build -c debug --static-swift-stdlib",
-        "strip .build/debug/AdwaitaTemplate",
-        "install -Dm755 .build/debug/AdwaitaTemplate /app/bin/AdwaitaTemplate",
+        "strip .build/debug/ti2500",
+        "install -Dm755 .build/debug/ti2500 /app/bin/ti2500",
         "install -Dm644 data/org.sergev.ti2500.metainfo.xml $DESTDIR/app/share/metainfo/org.sergev.ti2500.metainfo.xml",
         "install -Dm644 data/org.sergev.ti2500.desktop $DESTDIR/app/share/applications/org.sergev.ti2500.desktop",
         "install -Dm644 data/icons/org.sergev.ti2500.svg $DESTDIR/app/share/icons/hicolor/scalable/apps/org.sergev.ti2500.svg",
