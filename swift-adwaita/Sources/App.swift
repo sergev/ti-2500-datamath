@@ -11,11 +11,7 @@ struct CalculatorApp: App {
 
     var scene: Scene {
         Window(id: "main") { window in
-            Text(Loc.helloWorld)
-                .padding()
-                .topToolbar {
-                    ToolbarView(app: app, window: window)
-                }
+            Content(app: app, window: window)
         }
         .defaultSize(width: 450, height: 300)
         .title("TI-2500 Datamath")
