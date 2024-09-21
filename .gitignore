@@ -3,3 +3,8 @@ ti2500
 build
 .build
 *.swift-
+*.abi.json
+*.swiftdoc
+*.swiftmodule
+*.swiftsourceinfo
+*.a

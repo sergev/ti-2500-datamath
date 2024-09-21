@@ -1,0 +1,4 @@
+module ModelCxx {
+    header "ModelCxx.h"
+    export *
+}
