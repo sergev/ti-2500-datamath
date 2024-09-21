@@ -1,0 +1,21 @@
+default: en
+
+helloWorld:
+    en: Hello, world!
+    de: Hallo, Welt!
+
+newWindow:
+    en: New Window
+    de: Neues Fenster
+
+closeWindow:
+    en: Close Window
+    de: Fenster schliessen
+
+about:
+    en: About AdwaitaTemplate
+    de: Info zu AdwaitaTemplate
+
+mainMenu:
+    en: Main Menu
+    de: Hauptmenü

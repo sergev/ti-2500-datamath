@@ -1,0 +1,14 @@
+.DS_Store
+/.build
+/.flatpak
+/.flatpak-builder
+/build-dir
+/run
+/Packages
+/*.xcodeproj
+/Package.resolved
+xcuserdata/
+DerivedData/
+.swiftpm/config/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc
