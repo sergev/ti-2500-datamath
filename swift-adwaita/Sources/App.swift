@@ -13,7 +13,7 @@ struct CalculatorApp: App {
         Window(id: "main") { window in
             Content(app: app, window: window)
         }
-        .defaultSize(width: 450, height: 300)
+        .defaultSize(width: 300, height: 300)
         .title("TI-2500 Datamath")
         .quitShortcut()
         .closeShortcut()
